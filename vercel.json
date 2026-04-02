@@ -1,4 +1,5 @@
 {
+  "version": 2,
   "routes": [
     { "src": "/ags-check", "dest": "/ags-check.html" }
   ]
