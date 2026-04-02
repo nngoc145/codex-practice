@@ -1,5 +1,1 @@
-{
-  "rewrites": [
-    { "source": "/ags-check", "destination": "/api/ags-check" }
-  ]
-}
+{}
