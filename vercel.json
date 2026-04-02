@@ -1,6 +1,14 @@
 {
   "version": 2,
-  "rewrites": [
-    { "source": "/ags-check", "destination": "/api/ags-check" }
+  "routes": [
+    {
+      "src": "/ags-check",
+      "headers": {
+        "Content-Type": "application/json",
+        "Cache-Control": "no-store"
+      },
+      "status": 200,
+      "body": "{\"status\":\"ok\"}"
+    }
   ]
 }
