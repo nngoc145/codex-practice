@@ -1,14 +1,6 @@
 {
   "version": 2,
   "routes": [
-    {
-      "src": "/ags-check",
-      "headers": {
-        "Content-Type": "application/json",
-        "Cache-Control": "no-store"
-      },
-      "status": 200,
-      "body": "{\"status\":\"ok\"}"
-    }
+    { "src": "^/ags-check$", "dest": "/api/ags-check" }
   ]
 }
