@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nhi Tran Portfolio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700;800&family=Playfair+Display:wght@700;800&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <style>
+      :root {
+        --bg: #f7efe3;
+        --paper: rgba(255, 250, 243, 0.9);
+        --ink: #1f2937;
+        --muted: #5b6470;
+        --accent: #d96c3d;
+        --accent-deep: #9f4726;
+        --line: rgba(31, 41, 55, 0.1);
+        --shadow: 0 24px 60px rgba(117, 68, 40, 0.14);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Be Vietnam Pro", sans-serif;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at top left, rgba(217, 108, 61, 0.2), transparent 28%),
+          radial-gradient(circle at bottom right, rgba(86, 146, 108, 0.16), transparent 26%),
+          linear-gradient(160deg, #fcf7f0 0%, #f4ead9 52%, #efe3cf 100%);
+      }
+
+      .page {
+        min-height: 100vh;
+        padding: 28px 18px 44px;
+      }
+
+      .shell {
+        width: min(1160px, 100%);
+        margin: 0 auto;
+        padding: 20px;
+        border-radius: 34px;
+        background: rgba(255, 252, 247, 0.56);
+        border: 1px solid rgba(255, 255, 255, 0.65);
+        backdrop-filter: blur(18px);
+        box-shadow: var(--shadow);
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: 1.05fr 0.95fr;
+        gap: 22px;
+      }
+
+      .card,
+      .credit {
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: 28px;
+        padding: 24px;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 15px;
+        border-radius: 999px;
+        background: rgba(217, 108, 61, 0.12);
+        color: var(--accent-deep);
+        font-size: 0.92rem;
+        font-weight: 700;
+      }
+
+      h1,
+      h2 {
+        margin: 0;
+        font-family: "Playfair Display", serif;
+      }
+
+      h1 {
+        margin-top: 18px;
+        font-size: clamp(3rem, 8vw, 5.8rem);
+        line-height: 0.96;
+      }
+
+      .subtitle {
+        margin: 16px 0 0;
+        color: var(--muted);
+        font-size: 1.02rem;
+        line-height: 1.75;
+      }
+
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 22px;
+      }
+
+      .chip {
+        padding: 11px 14px;
+        border-radius: 16px;
+        background: #fff;
+        border: 1px solid rgba(217, 108, 61, 0.18);
+        font-size: 0.94rem;
+      }
+
+      .portrait {
+        position: relative;
+        overflow: hidden;
+      }
+
+      .portrait img {
+        width: 100%;
+        height: 100%;
+        min-height: 500px;
+        object-fit: cover;
+        display: block;
+        border-radius: 24px;
+      }
+
+      .portrait-badge {
+        position: absolute;
+        left: 18px;
+        right: 18px;
+        bottom: 18px;
+        padding: 14px 16px;
+        border-radius: 18px;
+        background: rgba(255, 251, 245, 0.9);
+        border: 1px solid rgba(31, 41, 55, 0.08);
+        backdrop-filter: blur(12px);
+      }
+
+      .portrait-badge strong,
+      .credit strong {
+        display: block;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+      }
+
+      .section-title {
+        margin-bottom: 14px;
+        font-size: 2rem;
+      }
+
+      .stack {
+        display: grid;
+        gap: 12px;
+      }
+
+      .item {
+        padding: 15px 16px;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.75);
+        border: 1px solid rgba(31, 41, 55, 0.08);
+      }
+
+      .item strong,
+      .credit small,
+      .status {
+        display: block;
+      }
+
+      .item strong {
+        margin-bottom: 6px;
+        font-size: 0.92rem;
+      }
+
+      .item span,
+      .credit small,
+      .status {
+        color: var(--muted);
+        font-size: 0.95rem;
+        line-height: 1.6;
+        word-break: break-word;
+      }
+
+      .quote p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.8;
+      }
+
+      .credit {
+        margin-top: 22px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+      }
+
+      .action {
+        border: 0;
+        border-radius: 16px;
+        padding: 14px 18px;
+        background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+        color: #fff;
+        font: inherit;
+        font-weight: 800;
+        cursor: pointer;
+      }
+
+      .action:disabled {
+        opacity: 0.7;
+        cursor: wait;
+      }
+
+      @media (max-width: 960px) {
+        .hero,
+        .grid,
+        .credit {
+          grid-template-columns: 1fr;
+          flex-direction: column;
+          align-items: stretch;
+        }
+      }
+
+      @media (max-width: 560px) {
+        .page {
+          padding: 16px 12px 28px;
+        }
+
+        .shell,
+        .card,
+        .credit {
+          border-radius: 22px;
+        }
+
+        .shell {
+          padding: 12px;
+        }
+
+        .card,
+        .credit {
+          padding: 18px;
+        }
+
+        h1 {
+          font-size: 3rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page" id="capture-root">
+      <div class="shell">
+        <section class="hero">
+          <article class="card">
+            <div class="eyebrow">Agent SEE • Portfolio Tribute</div>
+            <h1>Nhi Tran</h1>
+            <p class="subtitle">
+              Portfolio mini dành tặng Nhi Tran, học viên Agent SEE có phong cách sống kỷ luật,
+              yêu nghe podcast, thích vẽ tranh và duy trì thói quen tập luyện đều đặn.
+            </p>
+            <div class="chips">
+              <div class="chip">Full name: Nhi Tran</div>
+              <div class="chip">Title: Học viên Agent SEE</div>
+              <div class="chip">Hobbies: Nghe podcast, Vẽ tranh</div>
+              <div class="chip">Habits: Dậy sớm 5h30</div>
+            </div>
+          </article>
+
+          <aside class="card portrait">
+            <img
+              src="https://trangden.vn/agentsee/lop-hoc/api/avatars/2063_avatar_md.jpg"
+              alt="Ảnh đại diện Nhi Tran"
+            />
+            <div class="portrait-badge">
+              <strong>Nhi Tran</strong>
+              <span>Quest ID: v-UGJ8Xe1FrjtK9PRfZViw</span>
+            </div>
+          </aside>
+        </section>
+
+        <section class="grid">
+          <article class="card">
+            <h2 class="section-title">Thông tin bạn bè</h2>
+            <div class="stack">
+              <div class="item">
+                <strong>Full name</strong>
+                <span>Nhi Tran</span>
+              </div>
+              <div class="item">
+                <strong>Email</strong>
+                <span>friend_2063@example.com</span>
+              </div>
+              <div class="item">
+                <strong>Phone</strong>
+                <span>0900-xxx-xxx</span>
+              </div>
+              <div class="item">
+                <strong>Facebook</strong>
+                <span>fb.com/user_2063</span>
+              </div>
+              <div class="item">
+                <strong>Zalo name</strong>
+                <span>zalo_user</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="card">
+            <h2 class="section-title">Profile gốc</h2>
+            <div class="stack">
+              <div class="item">
+                <strong>Title</strong>
+                <span>Học viên Agent SEE</span>
+              </div>
+              <div class="item">
+                <strong>Hobbies</strong>
+                <span>Nghe podcast, Vẽ tranh</span>
+              </div>
+              <div class="item">
+                <strong>Habits</strong>
+                <span>Tập thể dục 3 buổi/tuần, Dậy sớm 5h30</span>
+              </div>
+              <div class="item">
+                <strong>Quest ID</strong>
+                <span>v-UGJ8Xe1FrjtK9PRfZViw</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="card quote">
+            <h2 class="section-title">Ghi chú tặng bạn</h2>
+            <p>
+              Nhi Tran là một học viên Agent SEE với nhịp sống chủ động, giàu cảm hứng và tinh
+              thần chăm sóc bản thân rõ ràng qua các thói quen tập thể dục đều đặn, dậy sớm và
+              nuôi dưỡng sở thích nghe podcast, vẽ tranh.
+            </p>
+          </article>
+        </section>
+
+        <footer class="credit">
+          <div>
+            <small>Credit người làm</small>
+            <strong>Dr Ngọc Cao Xuan Ngoc</strong>
+            <small>Anh • nngoc145@gmail.com • 0922303222 • Quest ID: CWyg65vwlUcAN7FCiLD49g</small>
+          </div>
+
+          <div>
+            <button class="action" id="submit-shot">Chụp hình nộp bài tập</button>
+            <div class="status" id="status"></div>
+          </div>
+        </footer>
+      </div>
+    </main>
+
+    <script>
+      const myInfo = {
+        message: "Đăng nhập thành công",
+        profile: {
+          avatar_url: "https://trangden.vn/agentsee/lop-hoc/api/avatars/2119_avatar_md.jpg",
+          birthday: "1990-01-08",
+          email: "nngoc145@gmail.com",
+          facebook: "",
+          fullname: "Dr Ngọc Cao Xuan Ngoc",
+          id: 2119,
+          phone: "0922303222",
+          preferred_name: "Ngoc",
+          title: "Anh",
+          zalo_name: "Dr Ngọc"
+        },
+        quest_id: "CWyg65vwlUcAN7FCiLD49g"
+      };
+
+      const friendInfo = {
+        fullname: "Nhi Tran",
+        avatar_url: "https://trangden.vn/agentsee/lop-hoc/api/avatars/2063_avatar_md.jpg",
+        quest_id: "v-UGJ8Xe1FrjtK9PRfZViw",
+        email: "friend_2063@example.com",
+        phone: "0900-xxx-xxx",
+        facebook: "fb.com/user_2063",
+        zalo_name: "zalo_user",
+        title: "Học viên Agent SEE",
+        hobbies: "Nghe podcast, Vẽ tranh",
+        habits: "Tập thể dục 3 buổi/tuần, Dậy sớm 5h30"
+      };
+
+      const submitButton = document.getElementById("submit-shot");
+      const statusNode = document.getElementById("status");
+
+      async function canvasToBlob(canvas) {
+        return new Promise((resolve, reject) => {
+          canvas.toBlob(
+            (blob) => {
+              if (blob) {
+                resolve(blob);
+              } else {
+                reject(new Error("Không tạo được ảnh PNG"));
+              }
+            },
+            "image/png",
+            1
+          );
+        });
+      }
+
+      async function submitScreenshot() {
+        submitButton.disabled = true;
+        statusNode.textContent = "Đang chụp ảnh...";
+
+        try {
+          const canvas = await html2canvas(document.getElementById("capture-root"), {
+            backgroundColor: "#f7efe3",
+            useCORS: true,
+            scale: Math.min(window.devicePixelRatio || 1.5, 2),
+            scrollX: 0,
+            scrollY: 0
+          });
+
+          statusNode.textContent = "Đang gửi bài...";
+
+          const blob = await canvasToBlob(canvas);
+          const formData = new FormData();
+          formData.append("screenshot", blob, "nhi-tran-portfolio.png");
+          formData.append("my_info", JSON.stringify(myInfo));
+          formData.append("friend_info", JSON.stringify(friendInfo));
+
+          const response = await fetch(
+            "https://trangden.vn/agentsee/api/bai-tap/2119/5d1ee185fcb4f00932078374a9c8a98c/tuan-1/quest-1/step-1/submit",
+            {
+              method: "POST",
+              body: formData
+            }
+          );
+
+          const text = await response.text();
+          if (!response.ok) {
+            throw new Error(text || "Gửi bài không thành công");
+          }
+
+          statusNode.textContent = "Đã gửi bài thành công.";
+          console.log(text);
+        } catch (error) {
+          statusNode.textContent = "Gửi bài thất bại.";
+          console.error(error);
+        } finally {
+          submitButton.disabled = false;
+        }
+      }
+
+      submitButton.addEventListener("click", submitScreenshot);
+
+      if (new URLSearchParams(window.location.search).get("autosubmit") === "1") {
+        window.addEventListener("load", () => {
+          window.setTimeout(() => submitButton.click(), 1200);
+        });
+      }
+    </script>
+  </body>
+</html>

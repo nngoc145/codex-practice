@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Chatbot AI & AI Agent</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --accent: #10b981;
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Inter", system-ui, -apple-system, sans-serif;
+      background: radial-gradient(circle at 10% 20%, rgba(16,185,129,0.2), transparent 25%),
+                  radial-gradient(circle at 80% 0%, rgba(59,130,246,0.12), transparent 30%),
+                  var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 32px 16px;
+    }
+    .app {
+      width: min(920px, 100%);
+      background: var(--panel);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 16px;
+    }
+    h1 {
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: -0.3px;
+    }
+    .sub {
+      color: var(--muted);
+      margin-top: 4px;
+      font-size: 14px;
+    }
+    .chat-box {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.04);
+      border-radius: 12px;
+      padding: 16px;
+      overflow-y: auto;
+      min-height: 320px;
+      max-height: 520px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .msg {
+      padding: 12px 14px;
+      border-radius: 12px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+    .user { background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.25); }
+    .bot { background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.25); }
+    .input-row {
+      display: flex;
+      gap: 12px;
+      align-items: flex-end;
+    }
+    textarea {
+      flex: 1;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      padding: 12px 14px;
+      color: var(--text);
+      font: inherit;
+      resize: vertical;
+      min-height: 64px;
+      max-height: 180px;
+    }
+    textarea:focus { outline: 1px solid var(--accent); border-color: var(--accent); }
+    button {
+      background: var(--accent);
+      color: #0b1120;
+      border: none;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 120ms ease, box-shadow 120ms ease;
+    }
+    button:active { transform: translateY(1px); }
+    .hint {
+      font-size: 13px;
+      color: var(--muted);
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .tag { padding: 4px 8px; background: rgba(255,255,255,0.08); border-radius: 999px; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <h1>Chatbot AI & AI Agent</h1>
+      <div class="sub">Trả lời mọi câu hỏi về AI, AI Agent, cách tích hợp và bảo mật API key.</div>
+    </header>
+
+    <section id="chat" class="chat-box"></section>
+
+    <section>
+      <div class="input-row">
+        <textarea id="input" placeholder="Hỏi bất kỳ điều gì về AI / AI Agent..."></textarea>
+        <button id="send">Gửi</button>
+      </div>
+      <div class="hint">
+        <span class="tag">Local demo</span>
+        Nếu chưa cấu hình API key, chatbot trả lời bằng phản hồi mẫu. Thay API_URL & API_KEY trong mã để gọi model thật.
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Nếu chạy từ web (http/https) tự dùng same-origin /api/chat; nếu mở file:// thì hỏi người dùng
+    let API_URL = (location.protocol.startsWith("http")) ? `${location.origin}/api/chat` : "";
+    const SYSTEM_PROMPT = "Bạn là trợ lý chuyên về AI và AI Agent. Trả lời ngắn gọn, chính xác, ưu tiên các bước hành động.";
+
+    const chatBox = document.querySelector("#chat");
+    const input = document.querySelector("#input");
+    const sendBtn = document.querySelector("#send");
+
+    // yêu cầu mật khẩu ngay khi mở trang
+    window.addEventListener("load", () => {
+      const url = prompt("Nhập API_URL (bỏ trống để dùng mock):", API_URL || "http://127.0.0.1:5000/chat");
+      API_URL = (url || "").trim();
+      const pw = prompt("Nhập mật khẩu truy cập chatbot (nếu có):", "");
+      window.chatPassword = pw || "";
+    });
+
+    const appendMsg = (role, text) => {
+      const div = document.createElement("div");
+      div.className = `msg ${role}`;
+      div.textContent = text;
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    };
+
+    const mockReply = (question) => {
+      return `Demo trả lời: \n- Tôi có thể giải thích khái niệm AI Agent, cách bảo mật API key, và cách nối chatbot với Zalo/webhook.\n- Câu bạn hỏi: \"${question}\"\n- Để dùng model thật, nhập API_URL hợp lệ (vd. https://<project>.vercel.app/api/chat hoặc http://127.0.0.1:5000/chat).`;
+    };
+
+    const callModel = async (question) => {
+      if (!API_URL) return mockReply(question);
+      const body = { message: question, system: SYSTEM_PROMPT, password: window.chatPassword || "" };
+      const headers = { "Content-Type": "application/json" };
+
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers,
+          body: JSON.stringify(body)
+        });
+
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(`API lỗi ${res.status}: ${text}`);
+        }
+        const data = await res.json();
+        return data.reply || data.message || JSON.stringify(data);
+      } catch (err) {
+        // Bắt thêm lỗi mạng/CORS
+        throw new Error(`Failed to fetch từ ${API_URL}: ${err.message}`);
+      }
+    };
+
+    const send = async () => {
+      const question = input.value.trim();
+      if (!question) return;
+      input.value = "";
+      appendMsg("user", question);
+      appendMsg("bot", "Đang nghĩ...");
+
+      try {
+        const answer = await callModel(question);
+        chatBox.lastElementChild.textContent = answer;
+      } catch (err) {
+        chatBox.lastElementChild.textContent = `Lỗi: ${err.message}`;
+      }
+    };
+
+    sendBtn.addEventListener("click", send);
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        send();
+      }
+    });
+
+    // Lời chào ban đầu
+    appendMsg("bot", "Xin chào! Tôi là chatbot về AI & AI Agent. Hãy hỏi tôi bất kỳ điều gì về cách dùng API, bảo mật key, hoặc tích hợp chatbot.");
+  </script>
+</body>
+</html>

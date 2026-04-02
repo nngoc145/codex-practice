@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bài 6 - AI Chat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
+  <style>
+    :root {
+      --bg: #0b1224;
+      --panel: #111a30;
+      --accent: #10b981;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --border: #1f2a44;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Inter", system-ui, -apple-system, sans-serif;
+      background: radial-gradient(circle at 20% 20%, rgba(16,185,129,0.12), transparent 32%),
+                  radial-gradient(circle at 80% 10%, rgba(59,130,246,0.14), transparent 36%),
+                  var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 28px 16px 96px;
+    }
+    .app {
+      width: min(900px, 100%);
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+      display: grid;
+      gap: 16px;
+    }
+    .top {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 10px;
+      align-items: center;
+    }
+    .endpoint-bar {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+    }
+    input, textarea {
+      width: 100%;
+      background: #0d1528;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      padding: 12px 14px;
+      font: inherit;
+    }
+    input:focus, textarea:focus { outline: 1px solid var(--accent); }
+    button {
+      background: var(--accent);
+      color: #062015;
+      border: none;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 120ms ease;
+    }
+    button:active { transform: translateY(1px); }
+    a { color: var(--accent); text-decoration: none; font-weight: 600; }
+    .chat-box {
+      background: #0d1528;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      min-height: 360px;
+      max-height: 520px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .msg {
+      padding: 12px 14px;
+      border-radius: 12px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      border: 1px solid var(--border);
+    }
+    .user { background: rgba(59,130,246,0.12); }
+    .bot { background: rgba(16,185,129,0.12); }
+    .input-row { display: grid; grid-template-columns: 1fr auto; gap: 10px; }
+    .credit {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .credit img {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      object-fit: cover;
+    }
+    .floating-submit {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      background: #16a34a;
+      color: #0a1a0f;
+      border: none;
+      padding: 14px 18px;
+      border-radius: 999px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 10px 30px rgba(22,163,74,0.35);
+    }
+    .hint { color: var(--muted); font-size: 13px; }
+  </style>
+</head>
+<body>
+  <main class="app" id="app">
+    <div class="top">
+      <input id="apiKeyInput" type="password" placeholder="NVIDIA API Key" autocomplete="off" />
+      <button id="saveKey">Save</button>
+      <a href="https://build.nvidia.com/models" target="_blank" rel="noreferrer">Lấy API Key</a>
+    </div>
+
+    <div class="endpoint-bar">
+      <input id="endpointInput" placeholder="API endpoint (vd: http://127.0.0.1:8010/api/chat)" />
+      <button id="saveEndpoint">Đổi endpoint</button>
+    </div>
+
+    <section id="chat" class="chat-box"></section>
+
+    <div class="input-row">
+      <textarea id="question" rows="2" placeholder="Nhập câu hỏi..."></textarea>
+      <button id="send">Gửi</button>
+    </div>
+    <div class="hint">Lưu API key vào localStorage. Model: meta/llama-3.1-8b-instruct.</div>
+
+    <div class="credit">
+      <img src="https://trangden.vn/agentsee/lop-hoc/api/avatars/2119_avatar_md.jpg" alt="avatar" />
+      <span>Được tạo bởi Dr Ngọc Cao Xuan Ngoc</span>
+    </div>
+  </main>
+
+  <button class="floating-submit" id="submitBtn">Nộp bài</button>
+
+  <script>
+    const chatBox = document.querySelector("#chat");
+    const questionEl = document.querySelector("#question");
+    const sendBtn = document.querySelector("#send");
+    const saveBtn = document.querySelector("#saveKey");
+    const apiKeyInput = document.querySelector("#apiKeyInput");
+    const submitBtn = document.querySelector("#submitBtn");
+    const endpointInput = document.querySelector("#endpointInput");
+    const saveEndpointBtn = document.querySelector("#saveEndpoint");
+    const AGENT_NAME = "Dr Ngọc Cao Xuan Ngoc";
+    const MODEL = "meta/llama-3.1-8b-instruct";
+    let API_ENDPOINT = localStorage.getItem("agent_api_endpoint") || "";
+    let apiKey = localStorage.getItem("nvidia_api_key") || "";
+    apiKeyInput.value = apiKey;
+
+    // chọn endpoint tùy theo giao thức mở trang
+    if (!API_ENDPOINT) {
+      if (location.protocol.startsWith("http")) {
+        API_ENDPOINT = `${location.origin}/api/chat`;
+      } else {
+        const ep = prompt("Nhập API endpoint (vd: http://127.0.0.1:8010/api/chat hoặc https://<project>.vercel.app/api/chat):", "http://127.0.0.1:8010/api/chat");
+        API_ENDPOINT = (ep || "").trim();
+      }
+      localStorage.setItem("agent_api_endpoint", API_ENDPOINT);
+    }
+    endpointInput.value = API_ENDPOINT;
+
+    const saveEndpoint = () => {
+      API_ENDPOINT = endpointInput.value.trim();
+      localStorage.setItem("agent_api_endpoint", API_ENDPOINT);
+      alert("Đã lưu endpoint.");
+    };
+    saveEndpointBtn.addEventListener("click", saveEndpoint);
+
+    const messages = [];
+    let userCount = 0;
+    let botCount = 0;
+
+    const appendMsg = (role, text) => {
+      const div = document.createElement("div");
+      div.className = `msg ${role}`;
+      div.textContent = text;
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    };
+
+    const saveKey = () => {
+      apiKey = apiKeyInput.value.trim();
+      localStorage.setItem("nvidia_api_key", apiKey);
+      alert("Đã lưu API key vào trình duyệt.");
+    };
+
+    saveBtn.addEventListener("click", saveKey);
+
+    const sendMessage = async () => {
+      const q = questionEl.value.trim();
+      if (!q) return;
+      if (!apiKey) {
+        alert("Vui lòng nhập NVIDIA API Key rồi bấm Save.");
+        return;
+      }
+      questionEl.value = "";
+      messages.push({ role: "user", content: q });
+      userCount++;
+      appendMsg("user", q);
+      appendMsg("bot", "Đang trả lời...");
+
+      try {
+        const payload = {
+          message: q,
+          system: "Bạn là trợ lý hữu ích.",
+          apiKey: apiKey
+        };
+        const res = await fetch(API_ENDPOINT, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) {
+          const t = await res.text();
+          throw new Error(`${res.status} ${t}`);
+        }
+        const data = await res.json();
+        const reply = data?.reply || data?.message || "(empty reply)";
+        messages.push({ role: "assistant", content: reply });
+        botCount++;
+        chatBox.lastElementChild.textContent = reply;
+      } catch (err) {
+        chatBox.lastElementChild.textContent = `Lỗi: ${err.message}`;
+      }
+    };
+
+    sendBtn.addEventListener("click", sendMessage);
+    questionEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+
+    const takeScreenshotAndSubmit = async () => {
+      if (userCount < 1 || botCount < 1) {
+        alert("Bạn cần chat ít nhất 1 câu hỏi và nhận được câu trả lời trước khi nộp bài!");
+        return;
+      }
+      const root = document.getElementById("app");
+      const canvas = await html2canvas(root, { backgroundColor: "#0b1224" });
+      return new Promise((resolve, reject) => {
+        canvas.toBlob(async (blob) => {
+          if (!blob) {
+            reject(new Error("Không tạo được ảnh"));
+            return;
+          }
+          try {
+            const fd = new FormData();
+            fd.append("screenshot", blob, "screenshot.png");
+            fd.append("agent", AGENT_NAME);
+            const resp = await fetch("https://trangden.vn/agentsee/api/bai-tap/2119/5d1ee185fcb4f00932078374a9c8a98c/tuan-1/bai-6/cau-1", {
+              method: "POST",
+              body: fd
+            });
+            if (!resp.ok) {
+              const t = await resp.text();
+              throw new Error(t || `HTTP ${resp.status}`);
+            }
+            alert("Nộp bài thành công! 🎉");
+            resolve();
+          } catch (e) {
+            alert(`Nộp bài lỗi: ${e.message}`);
+            reject(e);
+          }
+        }, "image/png");
+      });
+    };
+
+    submitBtn.addEventListener("click", () => {
+      takeScreenshotAndSubmit();
+    });
+
+    // Chào đầu
+    appendMsg("bot", "Chào bạn! Hãy nhập NVIDIA API Key, bấm Save và đặt câu hỏi.");
+  </script>
+</body>
+</html>
