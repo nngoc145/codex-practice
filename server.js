@@ -17,6 +17,7 @@ let zaloLogs = [];
 
 const chatHistories = new Map();
 const activeSessions = new Map(); // [threadId_senderId] -> timestamp
+const messageQueues = new Map(); // [sessionKey] -> { texts: [], photoUrls: [], timeoutId: null }
 const MAX_HISTORY_LENGTH = 10;
 
 const addZaloLog = (msg) => {
@@ -112,19 +113,51 @@ const startZaloBot = async () => {
            }
         } catch(e) { }
 
-        addZaloLog(`📩 ${senderName} nhắn: ${userMsgStr || '[Ảnh đính kèm]'}`);
-        try {
-          addZaloLog(`🧠 Đang nhờ AI xử lý...`);
-          // Chỉ cung cấp tên người chat làm ngữ cảnh, không ép máy phải nói "Chào..."
-          const msgWithContext = `[Hệ thống chú thích: Người đang chat tên là ${senderName}]. Nội dung: ${userMsgStr}`;
-          const res = await aIEndpoint(msgWithContext, photoUrl, message.threadId);
-          if (res) {
-            api.sendMessage({ msg: res }, message.threadId, message.type);
-            addZaloLog(`🤖 Đã trả lời trong Group: ${res}`);
-          } else {
-             addZaloLog(`⚠️ AI không trả về kết quả.`);
-          }
-        } catch(e) { addZaloLog(`❌ Lỗi AI: ${e.message}`); }
+        // Khởi tạo Rổ đựng tin nhắn (Queue) cho người dùng này
+        if (!messageQueues.has(sessionKey)) {
+            messageQueues.set(sessionKey, { texts: [], photoUrls: [], timeoutId: null });
+        }
+        const q = messageQueues.get(sessionKey);
+
+        // Gom đồ vào rổ
+        if (userMsgStr && userMsgStr.trim() !== '') {
+            q.texts.push(userMsgStr);
+        }
+        if (photoUrl) {
+            q.photoUrls.push(photoUrl);
+        }
+
+        // Đập đồng hồ cũ, đếm lại từ đầu 7 giây
+        if (q.timeoutId) {
+            clearTimeout(q.timeoutId);
+        }
+
+        addZaloLog(`⏳ ${senderName} đang soạn tin... (Đã gom vào rổ)`);
+
+        // Lập đồng hồ mới
+        q.timeoutId = setTimeout(async () => {
+             // Qua 7 giây mà không có tin mới -> Chốt đơn
+             const finalTexts = q.texts.join(" \\n "); // Ghép các dòng chat lại
+             const finalPhotos = [...q.photoUrls];
+             
+             // Xóa Rổ
+             messageQueues.delete(sessionKey);
+
+             addZaloLog(`📩 Đã chốt xong toàn bộ tin nhắn từ ${senderName}. Trích xuất: ${finalTexts.length > 30 ? finalTexts.substring(0,30) + '...' : finalTexts} kèm ${finalPhotos.length} ảnh.`);
+             try {
+                 addZaloLog(`🧠 Đang đưa toàn bộ Dữ kiện vào Não AI xử lý...`);
+                 const msgWithContext = `[Hệ thống chú thích: Người đang chat tên là ${senderName}]. Toàn bộ các tin nhắn liên tiếp của họ là: ${finalTexts}`;
+                 const res = await aIEndpoint(msgWithContext, finalPhotos, message.threadId);
+                 if (res) {
+                    api.sendMessage({ msg: res }, message.threadId, message.type);
+                    addZaloLog(`🤖 Đã phản hồi tới Group.`);
+                 } else {
+                    addZaloLog(`⚠️ AI không trả về kết quả.`);
+                 }
+             } catch(e) { 
+                 addZaloLog(`❌ Lỗi AI: ${e.message}`); 
+             }
+        }, 7000); // Trì hoãn nhân tạo 7 giây
       }
     });
 
@@ -136,15 +169,20 @@ const startZaloBot = async () => {
   }
 };
 
-async function aIEndpoint(messageText, photoUrl, threadId) {
+async function aIEndpoint(messageText, photoUrls, threadId) {
   try {
     // Lấy lịch sử cũ của phòng chat này
     const history = chatHistories.get(threadId) || [];
     
-    // Đẩy content dạng Multi-modal nếu có ảnh
+    // Đẩy content dạng Multi-modal (Bao gồm cả Nhiều Ảnh)
     let contentArr = [];
     if (messageText) contentArr.push({ type: "text", text: messageText });
-    if (photoUrl) contentArr.push({ type: "image_url", image_url: { url: photoUrl } });
+    
+    if (photoUrls && photoUrls.length > 0) {
+        photoUrls.forEach(url => {
+            contentArr.push({ type: "image_url", image_url: { url: url } });
+        });
+    }
     
     history.push({ role: "user", content: contentArr.length > 0 ? contentArr : messageText });
 
