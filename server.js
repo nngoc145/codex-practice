@@ -81,7 +81,8 @@ const startZaloBot = async () => {
         // Kiểm tra Session và Gọi Tên
         const lowerMsg = String(userMsgStr).toLowerCase();
         const keywordPattern = /\b(baby health|bé heo|be heo|heo|bé|be)\b/u;
-        const sessionKey = `${message.threadId}_${message.senderId}`;
+        const activeSenderId = message.data.uidFrom;
+        const sessionKey = `${message.threadId}_${activeSenderId}`;
         const now = Date.now();
         let isTargeted = false;
 
@@ -104,8 +105,8 @@ const startZaloBot = async () => {
 
         let senderName = "cô chú";
         try {
-           const userInfoRes = await api.getUserInfo(message.senderId);
-           const pInfo = userInfoRes?.changed_profiles?.[message.senderId] || userInfoRes?.[message.senderId];
+           const userInfoRes = await api.getUserInfo(activeSenderId);
+           const pInfo = userInfoRes?.changed_profiles?.[activeSenderId] || userInfoRes?.[activeSenderId];
            if (pInfo) {
               const name = pInfo.displayName || pInfo.name || pInfo.zaloName || "người lạ";
               const prefix = pInfo.gender === 0 ? "Chú" : "Cô";
