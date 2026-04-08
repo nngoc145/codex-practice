@@ -65,11 +65,14 @@ const startZaloBot = async () => {
       if (message.isSelf || !isPlainText) return;
       
       if (message.type === ThreadType.Group) {
-        const userMsg = message.data.content;
+        const userMsg = message.data.content || "";
+        // Log nội dung thô để kiểm tra tại sao Bot không nhận ra
+        addZaloLog(`[Gỡ lỗi hệ thống] Zalo báo có tin nhắn vào: ${JSON.stringify(userMsg)}`);
         
         // Kiểm tra xem tin nhắn có nhắc đến Bé Heo không (chữ hoa/thường đều được, có dấu/không dấu)
-        const lowerMsg = userMsg.toLowerCase();
+        const lowerMsg = String(userMsg).toLowerCase();
         if (!lowerMsg.includes('bé heo') && !lowerMsg.includes('be heo') && !lowerMsg.includes('baby health')) {
+          addZaloLog(`[Gỡ lỗi] Đã bỏ qua tin nhắn trên vì bộ lọc không tìm thấy chữ bé heo/baby health.`);
           return; // Bỏ qua nếu không gọi tên
         }
 
