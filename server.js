@@ -181,6 +181,13 @@ const server = http.createServer((req, res) => {
     return sendJson(res, 200, { success: true });
   }
 
+  if (pathname === '/api/zalo-logout' && req.method === 'POST') {
+    zaloStatus = 'stopped';
+    zaloQrBase64 = '';
+    zaloLogs = ['[Hệ thống] Cán bộ đã đăng xuất. Vui lòng quét mã QR mới.'];
+    return sendJson(res, 200, { success: true });
+  }
+
   if (pathname === '/api/zalo-logs') {
     return sendJson(res, 200, { logs: zaloLogs });
   }
