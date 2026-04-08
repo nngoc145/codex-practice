@@ -69,10 +69,14 @@ const startZaloBot = async () => {
         // Log nội dung thô để kiểm tra tại sao Bot không nhận ra
         addZaloLog(`[Gỡ lỗi hệ thống] Zalo báo có tin nhắn vào: ${JSON.stringify(userMsg)}`);
         
-        // Kiểm tra xem tin nhắn có nhắc đến Bé Heo không (chữ hoa/thường đều được, có dấu/không dấu)
+        // Kiểm tra đa từ khóa: Baby Health, Bé heo, Be heo, Heo, Bé, Be.
         const lowerMsg = String(userMsg).toLowerCase();
-        if (!lowerMsg.includes('bé heo') && !lowerMsg.includes('be heo') && !lowerMsg.includes('baby health')) {
-          addZaloLog(`[Gỡ lỗi] Đã bỏ qua tin nhắn trên vì bộ lọc không tìm thấy chữ bé heo/baby health.`);
+        
+        // Dùng Regex \b để đảm bảo nó là 1 từ độc lập, không phải bị dính trong chữ khác (VD: "bên" không bị ép thành "be")
+        const keywordPattern = /\b(baby health|bé heo|be heo|heo|bé|be)\b/u;
+        
+        if (!keywordPattern.test(lowerMsg)) {
+          addZaloLog(`[Gỡ lỗi] Đã bỏ qua tin nhắn trên vì bộ lọc không tìm thấy từ khóa chỉ định.`);
           return; // Bỏ qua nếu không gọi tên
         }
 
