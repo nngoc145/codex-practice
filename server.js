@@ -66,6 +66,13 @@ const startZaloBot = async () => {
       
       if (message.type === ThreadType.Group) {
         const userMsg = message.data.content;
+        
+        // Kiểm tra xem tin nhắn có nhắc đến Bé Heo không (chữ hoa/thường đều được, có dấu/không dấu)
+        const lowerMsg = userMsg.toLowerCase();
+        if (!lowerMsg.includes('bé heo') && !lowerMsg.includes('be heo')) {
+          return; // Bỏ qua nếu không gọi tên
+        }
+
         addZaloLog(`📩 Nhóm nhắn: ${userMsg}`);
         try {
           addZaloLog(`🧠 Đang nhờ AI xử lý...`);
