@@ -73,10 +73,22 @@ const startZaloBot = async () => {
           return; // Bỏ qua nếu không gọi tên
         }
 
-        addZaloLog(`📩 Nhóm nhắn: ${userMsg}`);
+        let senderName = "cô chú";
+        try {
+           const userInfoRes = await api.getUserInfo(message.senderId);
+           const pInfo = userInfoRes?.changed_profiles?.[message.senderId] || userInfoRes?.[message.senderId];
+           if (pInfo) {
+              const name = pInfo.displayName || pInfo.name || pInfo.zaloName || "người lạ";
+              const prefix = pInfo.gender === 0 ? "Chú" : "Cô";
+              senderName = `${prefix} ${name}`;
+           }
+        } catch(e) { }
+
+        addZaloLog(`📩 ${senderName} nhắn: ${userMsg}`);
         try {
           addZaloLog(`🧠 Đang nhờ AI xử lý...`);
-          const res = await aIEndpoint(userMsg, message.threadId);
+          const msgWithContext = `[Thông báo hệ thống: Người đang nói chuyện với bạn là ${senderName}. Hãy gọi họ bằng tên này để thân thiện hơn, ví dụ: "Chào ${senderName} ạ"]. Tin nhắn của họ là: ${userMsg}`;
+          const res = await aIEndpoint(msgWithContext, message.threadId);
           if (res) {
             api.sendMessage({ msg: res }, message.threadId, message.type);
             addZaloLog(`🤖 Đã trả lời trong Group: ${res}`);
