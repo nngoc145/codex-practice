@@ -15,6 +15,9 @@ let isZaloStarting = false;
 let zaloInstance = null;
 let zaloLogs = [];
 
+const chatHistories = new Map();
+const MAX_HISTORY_LENGTH = 10;
+
 const addZaloLog = (msg) => {
   const timeStr = new Date().toLocaleTimeString('vi-VN');
   zaloLogs.push(`[${timeStr}] ${msg}`);
@@ -66,7 +69,7 @@ const startZaloBot = async () => {
         addZaloLog(`📩 Nhóm nhắn: ${userMsg}`);
         try {
           addZaloLog(`🧠 Đang nhờ AI xử lý...`);
-          const res = await aIEndpoint(userMsg);
+          const res = await aIEndpoint(userMsg, message.threadId);
           if (res) {
             api.sendMessage({ msg: res }, message.threadId, message.type);
             addZaloLog(`🤖 Đã trả lời trong Group: ${res}`);
@@ -85,13 +88,23 @@ const startZaloBot = async () => {
   }
 };
 
-async function aIEndpoint(message) {
+async function aIEndpoint(message, threadId) {
   try {
+    // Lấy lịch sử cũ của phòng chat này
+    const history = chatHistories.get(threadId) || [];
+    
+    // Đẩy tin nhắn mới của bệnh nhân vào bộ nhớ
+    history.push({ role: "user", content: message });
+
+    // Cấu trúc nội dung trò chuyện (Prompt)
     const payload = {
-      model: "meta/llama-3.1-8b-instruct",
+      model: "meta/llama-3.1-70b-instruct", // Nâng model lên 70 tỉ tham số
       messages: [
-        { role: "system", content: "Bạn là một AI Agent thông minh. Hãy trả lời ngắn gọn, trực tiếp, xưng 'tôi' và gọi người dùng là 'bạn'." },
-        { role: "user", content: message }
+        { 
+          role: "system", 
+          content: "Bạn là Trợ lý AI Y Khoa của Bác sĩ Ngọc. Nhiệm vụ của bạn là tư vấn các vấn đề sức khỏe, phân tích triệu chứng một cách chuyên môn, nhẹ nhàng và chu đáo. Bạn xưng 'tôi' và gọi khách hàng là 'bạn'. Bắt buộc khuyên họ đến gặp bác sĩ trực tiếp nếu có dấu hiệu nguy hiểm." 
+        },
+        ...history // Chèn lịch sử liên tục 
       ],
       temperature: 0.7,
       max_tokens: 1500
@@ -112,7 +125,20 @@ async function aIEndpoint(message) {
         return null;
     }
     const d = await r.json();
-    return d.choices?.[0]?.message?.content || null;
+    const replyBot = d.choices?.[0]?.message?.content || null;
+    
+    if (replyBot) {
+        // Lưu câu trả lời của AI vào bộ nhớ lịch sử
+        history.push({ role: "assistant", content: replyBot });
+        
+        // Quét dọn bộ nhớ nếu quá dài (> 10 tin nhắn) để chống tốn tài nguyên
+        if (history.length > MAX_HISTORY_LENGTH) {
+            history.splice(0, history.length - MAX_HISTORY_LENGTH);
+        }
+        chatHistories.set(threadId, history);
+    }
+
+    return replyBot;
   } catch(e){ 
     addZaloLog(`❌ Lỗi Fetch: ${e.message}`);
     return null; 
