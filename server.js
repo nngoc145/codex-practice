@@ -139,7 +139,7 @@ const sendJson = (res, statusCode, payload) => {
 };
 
 const serveStatic = (pathname, res) => {
-  const safePath = pathname === '/' ? '/chat.html' : pathname;
+  const safePath = pathname === '/' ? '/zalo.html' : pathname;
   const filePath = path.join(ROOT, safePath.replace(/^\/+/, ''));
 
   fs.readFile(filePath, (err, data) => {
