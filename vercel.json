@@ -1,6 +1,18 @@
 {
   "version": 2,
+  "builds": [
+    { "src": "api/**/*.js", "use": "@vercel/node" },
+    { "src": "public/**/*", "use": "@vercel/static" },
+    { "src": "chat.html", "use": "@vercel/static" },
+    { "src": "index.html", "use": "@vercel/static" },
+    { "src": "agent.html", "use": "@vercel/static" }
+  ],
   "routes": [
-    { "src": "^/ags-check$", "dest": "/api/ags-check" }
+    { "src": "^/ags-check$", "dest": "/api/ags-check" },
+    { "src": "^/api/chat$", "dest": "/api/chat.js" },
+    { "src": "^/agent$", "dest": "/agent.html" },
+    { "src": "^/chat$", "dest": "/chat.html" },
+    { "src": "^/$", "dest": "/chat.html" },
+    { "src": "/(.*)", "dest": "/public/$1" }
   ]
 }

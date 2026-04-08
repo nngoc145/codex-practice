@@ -1,5 +1,12 @@
 {
   "name": "codex-practice",
   "version": "1.0.0",
-  "private": true
+  "private": true,
+  "dependencies": {
+    "dotenv": "^17.4.1",
+    "zca-js": "^2.1.2"
+  },
+  "scripts": {
+    "start": "node server.js"
+  }
 }

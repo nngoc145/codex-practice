@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Viên Uống KTIRA Omega-3 Krill - Dầu Nhuyễn Thể</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --panel: #ffffff;
+      --text: #102a43;
+      --muted: #52606d;
+      --accent: #0f766e;
+      --accent-strong: #115e59;
+      --border: rgba(15, 118, 110, 0.15);
+      --shadow: 0 22px 60px rgba(15, 118, 110, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .page { max-width: 1200px; margin: 0 auto; padding: 28px 20px 48px; }
+    .hero { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 32px; align-items: center; }
+    .badge { display: inline-flex; align-items: center; gap: 10px; padding: 10px 16px; border-radius: 999px; background: rgba(15,118,110,0.12); color: var(--accent-strong); font-weight: 700; font-size: 0.95rem; }
+    h1 { margin: 18px 0 16px; font-size: clamp(2.8rem, 4vw, 4.6rem); line-height: 0.98; }
+    .subtitle { max-width: 600px; margin-bottom: 24px; color: var(--muted); font-size: 1.05rem; }
+    .price-card { display: flex; align-items: baseline; gap: 14px; margin-bottom: 24px; }
+    .price-card .price { font-size: clamp(2.4rem, 4vw, 3.4rem); font-weight: 800; color: var(--accent-strong); }
+    .price-card .tag { font-size: 0.95rem; color: var(--muted); }
+    .btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 16px 26px; border-radius: 18px; border: none; background: var(--accent); color: white; font-size: 1rem; font-weight: 700; cursor: pointer; text-decoration: none; transition: transform 120ms ease, background 120ms ease; }
+    .btn-primary:hover { transform: translateY(-1px); background: var(--accent-strong); }
+    .hero-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 20px; }
+    .hero-item { padding: 18px 20px; border-radius: 22px; background: white; border: 1px solid rgba(15,118,110,0.08); box-shadow: var(--shadow); }
+    .hero-item strong { display: block; margin-bottom: 8px; color: var(--accent-strong); }
+    .hero-image { position: relative; border-radius: 28px; overflow: hidden; background: linear-gradient(180deg,#ecfdf5 0%,#ffffff 100%); box-shadow: var(--shadow); }
+    .hero-image::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at top left, rgba(15,118,110,0.16), transparent 26%); pointer-events: none; }
+    .hero-image img { width: 100%; display: block; max-height: 520px; object-fit: contain; position: relative; z-index: 1; }
+
+    .section { margin-top: 56px; }
+    .section-title { margin: 0 0 20px; font-size: clamp(2rem, 3vw, 2.6rem); }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+    .card { background: white; border-radius: 24px; border: 1px solid var(--border); padding: 24px; box-shadow: var(--shadow); }
+    .card strong { display: block; margin-bottom: 14px; font-size: 1.05rem; color: var(--accent-strong); }
+    .card p { margin: 0; color: var(--muted); }
+    .feature-list { display: grid; gap: 18px; }
+    .feature { display: flex; gap: 16px; align-items: flex-start; }
+    .feature-icon { width: 44px; height: 44px; border-radius: 14px; background: rgba(15,118,110,0.1); color: var(--accent-strong); display: grid; place-items: center; font-weight: 700; flex-shrink: 0; }
+    .feature-content strong { display: block; margin-bottom: 6px; }
+    .reviews { display: grid; gap: 18px; }
+    .review { padding: 22px 24px; border-radius: 22px; background: white; border: 1px solid rgba(15,118,110,0.08); box-shadow: var(--shadow); }
+    .review strong { display: block; margin-bottom: 10px; font-size: 1rem; }
+    .faq { display: grid; gap: 16px; }
+    .faq-item { padding: 20px 22px; border-radius: 22px; background: white; border: 1px solid rgba(15,118,110,0.08); }
+    .faq-item summary { font-weight: 700; cursor: pointer; }
+    .faq-item p { margin: 12px 0 0; color: var(--muted); }
+    .footer { margin-top: 52px; padding: 28px 26px; border-radius: 26px; background: white; border: 1px solid rgba(15,118,110,0.08); text-align: center; }
+    .footer p { margin: 0; color: var(--muted); }
+
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr; }
+      .hero-list { grid-template-columns: 1fr; }
+      .grid-3 { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 640px) {
+      .page { padding: 20px 16px 32px; }
+      .hero-image { min-height: 320px; }
+      .price-card { flex-direction: column; align-items: flex-start; gap: 8px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <div>
+        <span class="badge">Sản phẩm chính hãng</span>
+        <h1>Viên Uống KTIRA Dầu Nhuyễn Thể Omega-3 Krill</h1>
+        <p class="subtitle">Giải pháp bổ sung Omega-3 tự nhiên từ dầu cá krill, hỗ trợ tim mạch, não bộ, giảm viêm và tăng cường sức khỏe toàn diện.</p>
+
+        <div class="price-card">
+          <div class="price">1.050.000₫ – 2.600.000₫</div>
+          <div class="tag">Giá tham khảo theo lựa chọn phiên bản</div>
+        </div>
+
+        <a class="btn-primary" href="#buy-now">Đặt mua ngay</a>
+
+        <div class="hero-list">
+          <div class="hero-item">
+            <strong>Omega-3 tự nhiên</strong>
+            Dầu nhuyễn thể giúp cơ thể hấp thụ nhanh và hiệu quả hơn so với dầu cá thông thường.
+          </div>
+          <div class="hero-item">
+            <strong>Bảo vệ tim mạch</strong>
+            Hỗ trợ giảm cholesterol, ổn định huyết áp và tăng cường tuần hoàn.
+          </div>
+          <div class="hero-item">
+            <strong>Giảm viêm & đau</strong>
+            Giúp giảm tình trạng viêm khớp, đau nhức cơ bắp và mệt mỏi mãn tính.
+          </div>
+          <div class="hero-item">
+            <strong>Cho trí não minh mẫn</strong>
+            Cung cấp DHA/EPA thiết yếu cho não bộ, tăng khả năng tập trung và ghi nhớ.
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-image">
+        <img src="https://ktira.com/wp-content/uploads/2024/07/KTIRA_OMEGA3_07-500x500.jpg" alt="Viên uống KTIRA Dầu Nhuyễn Thể Omega 3 Krill" />
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 class="section-title">Lợi ích nổi bật</h2>
+      <div class="grid-3">
+        <div class="card">
+          <strong>Hỗ trợ tim mạch</strong>
+          <p>Omega-3 Krill giúp giảm triglyceride, tăng HDL và cải thiện lưu thông máu cho trái tim khỏe mạnh.</p>
+        </div>
+        <div class="card">
+          <strong>Giảm viêm toàn thân</strong>
+          <p>Astaxanthin tự nhiên trong dầu krill giúp chống oxy hóa và giảm tác động viêm trên cơ thể.</p>
+        </div>
+        <div class="card">
+          <strong>Tăng cường trí nhớ</strong>
+          <p>Omega-3 thiết yếu hỗ trợ chức năng não bộ, giúp bạn tỉnh táo và tập trung cả ngày.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 class="section-title">Thành phần chuẩn mực</h2>
+      <div class="feature-list">
+        <div class="feature">
+          <span class="feature-icon">1</span>
+          <div class="feature-content">
+            <strong>Dầu nhuyễn thể Krill sạch</strong>
+            Giàu DHA, EPA và phospholipid giúp hấp thụ nhanh, dễ tiêu hóa và không gây ợ.
+          </div>
+        </div>
+        <div class="feature">
+          <span class="feature-icon">2</span>
+          <div class="feature-content">
+            <strong>Astaxanthin mạnh mẽ</strong>
+            Chống oxy hóa cao, bảo vệ tế bào và tăng hiệu quả dinh dưỡng của Omega-3.
+          </div>
+        </div>
+        <div class="feature">
+          <span class="feature-icon">3</span>
+          <div class="feature-content">
+            <strong>Không chất bảo quản</strong>
+            Sản phẩm an toàn, không chứa phẩm màu, hương liệu nhân tạo hay chất bảo quản độc hại.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 class="section-title">Review khách hàng</h2>
+      <div class="reviews">
+        <div class="review">
+          <strong>"Tôi dùng KTIRA mỗi ngày và thấy người tỉnh táo hơn, không còn khó chịu mệt mỏi."</strong>
+          <p>– Minh Anh, 38 tuổi</p>
+        </div>
+        <div class="review">
+          <strong>"Huyết áp ổn định hơn sau 1 tháng, không còn bị tê tay chân."</strong>
+          <p>– Hồng Nhung, 45 tuổi</p>
+        </div>
+        <div class="review">
+          <strong>"Uống dễ dàng, không hôi tanh, phù hợp với cả người lớn tuổi."</strong>
+          <p>– Thanh Tâm, 52 tuổi</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="buy-now">
+      <h2 class="section-title">Mua ngay - Số lượng có hạn</h2>
+      <p class="subtitle">Đặt hàng hôm nay để nhận ưu đãi miễn phí vận chuyển và quà tặng hấp dẫn.</p>
+      <div class="card">
+        <strong>Giá ưu đãi:</strong>
+        <p>1.050.000₫ – 2.600.000₫ / hộp 60 viên</p>
+        <p>Cam kết hàng chính hãng, giao hàng nhanh và đổi trả trong 7 ngày nếu không hài lòng.</p>
+        <a class="btn-primary" href="https://ktira.com/san-pham/vien-uong-ktira-dau-nhuyen-the-omega-3-krill/">Mua ngay trên KTIRA</a>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 class="section-title">Câu hỏi thường gặp</h2>
+      <div class="faq">
+        <details class="faq-item"><summary>Sản phẩm dùng cho ai?</summary><p>Phù hợp cho người trưởng thành muốn hỗ trợ tim mạch, não bộ, giảm viêm và tăng cường sức khỏe chung.</p></details>
+        <details class="faq-item"><summary>Uống bao nhiêu viên mỗi ngày?</summary><p>Khuyến nghị 1-2 viên mỗi ngày sau bữa ăn hoặc theo chỉ dẫn của chuyên gia y tế.</p></details>
+        <details class="faq-item"><summary>Có gây hôi miệng không?</summary><p>Sản phẩm dầu nhuyễn thể Krill thiết kế để tránh mùi tanh khó chịu, phù hợp với nhiều người dùng.</p></details>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <p>Trang landing page mẫu cho sản phẩm KTIRA Omega-3 Krill. Liên hệ ngay nếu bạn muốn thiết kế bản thương mại hoàn chỉnh.</p>
+    </footer>
+  </main>
+</body>
+</html>

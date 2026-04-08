@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Chatbot AI & AI Agent</title>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <style>
     :root {
       --bg: #0f172a;
@@ -25,8 +26,110 @@
       justify-content: center;
       padding: 32px 16px;
     }
-    .app {
+
+    /* === LAYOUT WRAPPER for friend mode === */
+    .main-wrapper {
       width: min(920px, 100%);
+      display: flex;
+      gap: 0;
+    }
+    .main-wrapper.friend-mode {
+      width: min(1340px, 100%);
+      gap: 20px;
+    }
+
+    /* === LEFT PANEL (friend profile) === */
+    .friend-panel {
+      display: none;
+      width: 400px;
+      min-width: 400px;
+      background: var(--panel);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    .friend-mode .friend-panel {
+      display: flex;
+    }
+    .friend-panel .friend-avatar {
+      width: 300px;
+      height: 300px;
+      border-radius: 16px;
+      object-fit: cover;
+      border: 3px solid rgba(16,185,129,0.4);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    }
+    .friend-panel .friend-name {
+      font-size: 24px;
+      font-weight: 700;
+      text-align: center;
+      margin: 0;
+    }
+    .friend-panel .friend-role {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 16px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .friend-role.guest {
+      background: rgba(251,191,36,0.15);
+      border: 1px solid rgba(251,191,36,0.4);
+      color: #fbbf24;
+    }
+    .friend-role.member {
+      background: rgba(16,185,129,0.15);
+      border: 1px solid rgba(16,185,129,0.4);
+      color: #10b981;
+    }
+    .friend-panel .friend-detail {
+      width: 100%;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 16px;
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+    .friend-panel .submit-friend-btn {
+      margin-top: auto;
+      width: 100%;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #0b1120;
+      border: none;
+      padding: 14px 18px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 16px;
+      cursor: pointer;
+      transition: transform 120ms ease, box-shadow 120ms ease;
+    }
+    .friend-panel .submit-friend-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(245,158,11,0.3);
+    }
+    .friend-panel .submit-friend-btn:active { transform: translateY(1px); }
+    .friend-panel .submit-friend-btn:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
+    .friend-panel .submit-status {
+      font-size: 13px;
+      color: var(--muted);
+      text-align: center;
+      min-height: 20px;
+    }
+
+    /* === RIGHT PANEL (chat app) === */
+    .app {
+      flex: 1;
       background: var(--panel);
       border: 1px solid rgba(255,255,255,0.05);
       border-radius: 16px;
@@ -35,6 +138,7 @@
       display: grid;
       grid-template-rows: auto 1fr auto;
       gap: 16px;
+      min-width: 0;
     }
     h1 {
       margin: 0;
@@ -63,6 +167,56 @@
       border-radius: 12px;
       line-height: 1.5;
       white-space: pre-wrap;
+    }
+    .quota {
+      margin-top: 6px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .config {
+      display: grid;
+      gap: 8px;
+      background: rgba(255,255,255,0.02);
+      border: 1px dashed rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 8px;
+    }
+    .config-row {
+      display: grid;
+      grid-template-columns: 80px 1fr;
+      gap: 8px;
+      align-items: center;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .config input {
+      width: 100%;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: var(--text);
+      font: inherit;
+    }
+    .config .ghost {
+      justify-self: start;
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid rgba(16,185,129,0.6);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-weight: 600;
+    }
+    .admin-tools {
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+    }
+    .stats {
+      color: var(--muted);
     }
     .user { background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.25); }
     .bot { background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.25); }
@@ -103,44 +257,254 @@
       align-items: center;
     }
     .tag { padding: 4px 8px; background: rgba(255,255,255,0.08); border-radius: 999px; font-size: 12px; }
+    .auth-bar {
+      margin-top: 10px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .auth-inputs {
+      display: flex;
+      gap: 8px;
+      flex: 1;
+      min-width: 280px;
+    }
+    .auth-inputs input {
+      flex: 1;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: var(--text);
+      font: inherit;
+    }
+    .auth-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+    }
+    .badge {
+      padding: 4px 8px;
+      background: rgba(16,185,129,0.2);
+      border: 1px solid rgba(16,185,129,0.5);
+      border-radius: 8px;
+      font-weight: 700;
+      color: var(--accent);
+      font-size: 12px;
+    }
+    .ghost {
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid rgba(16,185,129,0.6);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-weight: 600;
+    }
   </style>
 </head>
 <body>
-  <main class="app">
-    <header>
-      <h1>Chatbot AI & AI Agent</h1>
-      <div class="sub">Trả lời mọi câu hỏi về AI, AI Agent, cách tích hợp và bảo mật API key.</div>
-    </header>
+  <div class="main-wrapper" id="main-wrapper">
+    <!-- LEFT PANEL: Friend profile (hidden by default) -->
+    <aside class="friend-panel" id="friend-panel">
+      <img class="friend-avatar" id="friend-avatar" src="" alt="Avatar người bạn" crossorigin="anonymous" />
+      <h2 class="friend-name" id="friend-name"></h2>
+      <span class="friend-role" id="friend-role"></span>
+      <div class="friend-detail" id="friend-detail"></div>
+      <button class="submit-friend-btn" id="submit-friend-btn">📸 Nộp bài hộ bạn</button>
+      <div class="submit-status" id="submit-status"></div>
+    </aside>
 
-    <section id="chat" class="chat-box"></section>
+    <!-- RIGHT PANEL: Chat app -->
+    <main class="app" id="chat-app">
+      <header>
+        <h1>Chatbot AI & AI Agent</h1>
+        <div class="sub">Trả lời mọi câu hỏi về AI, AI Agent, cách tích hợp và bảo mật API key.</div>
+        <div id="quota" class="quota">Khách: 3 prompt / 60 phút</div>
+        <div class="auth-bar">
+          <div class="auth-inputs">
+            <input id="token-input" type="text" placeholder="Login bằng token lớp Agent SEE" />
+            <button id="login-btn">Đăng nhập</button>
+          </div>
+          <div class="auth-info" id="user-info" hidden>
+            <span id="display-name"></span>
+            <span id="admin-badge" class="badge" hidden>ADMIN</span>
+            <button id="logout-btn" class="ghost">Đăng xuất</button>
+          </div>
+        </div>
+      </header>
 
-    <section>
-      <div class="input-row">
-        <textarea id="input" placeholder="Hỏi bất kỳ điều gì về AI / AI Agent..."></textarea>
-        <button id="send">Gửi</button>
-      </div>
-      <div class="hint">
-        <span class="tag">Local demo</span>
-        Nếu chưa cấu hình API key, chatbot trả lời bằng phản hồi mẫu. Thay API_URL & API_KEY trong mã để gọi model thật.
-      </div>
-    </section>
-  </main>
+      <section id="chat" class="chat-box"></section>
+
+      <section>
+        <div class="config">
+          <div class="config-row">
+            <label>API URL</label>
+            <input id="api-url" type="text" placeholder="https://<project>.vercel.app/api/chat hoặc http://127.0.0.1:3000/api/chat" />
+          </div>
+          <div class="config-row">
+            <label>API KEY</label>
+            <input id="api-key" type="password" placeholder="Nhập NVIDIA_API_KEY (để trống sẽ dùng trả lời mẫu)" />
+          </div>
+          <button id="save-config" class="ghost">Lưu cấu hình</button>
+        </div>
+        <div class="input-row">
+          <textarea id="input" placeholder="Hỏi bất kỳ điều gì về AI / AI Agent..."></textarea>
+          <button id="send">Gửi</button>
+        </div>
+        <div class="admin-tools" id="admin-tools" hidden>
+          <button id="clear-history" class="ghost">Xoá lịch sử</button>
+          <div id="stats" class="stats"></div>
+        </div>
+        <div class="hint">
+          <span class="tag">Local demo</span>
+          Nếu chưa cấu hình API key, chatbot trả lời bằng phản hồi mẫu. Thay API_URL & API_KEY trong mã để gọi model thật.
+        </div>
+      </section>
+    </main>
+  </div>
 
   <script>
-    // Nếu chạy từ web (http/https) tự dùng same-origin /api/chat; nếu mở file:// thì hỏi người dùng
+    // Nếu chạy từ web (http/https) tự dùng same-origin /api/chat; nếu mở file:// thì cho phép nhập thủ công
     let API_URL = (location.protocol.startsWith("http")) ? `${location.origin}/api/chat` : "";
     const SYSTEM_PROMPT = "Bạn là trợ lý chuyên về AI và AI Agent. Trả lời ngắn gọn, chính xác, ưu tiên các bước hành động.";
+    const cfg = {
+      apiUrl: localStorage.getItem("apiUrl") || API_URL,
+      apiKey: localStorage.getItem("apiKey") || "",
+    };
+
+    const OWNER_TOKEN = "5d1ee185fcb4f00932078374a9c8a98c";
 
     const chatBox = document.querySelector("#chat");
     const input = document.querySelector("#input");
     const sendBtn = document.querySelector("#send");
+    const quotaEl = document.querySelector("#quota");
+    const loginBtn = document.querySelector("#login-btn");
+    const logoutBtn = document.querySelector("#logout-btn");
+    const loginTokenInput = document.querySelector("#token-input");
+    const userInfo = document.querySelector("#user-info");
+    const adminBadge = document.querySelector("#admin-badge");
+    const clearBtn = document.querySelector("#clear-history");
+    const statsBox = document.querySelector("#stats");
+    const mainWrapper = document.querySelector("#main-wrapper");
+    const friendPanel = document.querySelector("#friend-panel");
+    const submitFriendBtn = document.querySelector("#submit-friend-btn");
+    const submitStatus = document.querySelector("#submit-status");
 
-    // yêu cầu mật khẩu ngay khi mở trang
+    // state
+    const state = {
+      session: JSON.parse(localStorage.getItem("session") || "null"), // {display_name, is_admin, token, avatar_url}
+      guestUsed: Number(localStorage.getItem("guestUsed") || "0"),
+      messageCount: Number(localStorage.getItem("messageCount") || "0"),
+      loginCount: Number(localStorage.getItem("loginCount") || "0"),
+    };
+
+    const ROLE = () => (state.session ? (state.session.is_admin ? "admin" : "member") : "guest");
+
+    // === FRIEND MODE LOGIC ===
+    const updateFriendPanel = () => {
+      if (!state.session || state.session.is_admin) {
+        // Admin or not logged in: hide friend panel
+        mainWrapper.classList.remove("friend-mode");
+        friendPanel.style.display = "none";
+        return;
+      }
+
+      // Non-admin friend logged in: show friend panel
+      mainWrapper.classList.add("friend-mode");
+      friendPanel.style.display = "flex";
+
+      const avatarUrl = state.session.avatar_url || "";
+      const friendName = state.session.display_name || "Bạn";
+      const role = state.session.is_admin ? "Admin" : "Guest / Member";
+
+      document.querySelector("#friend-avatar").src = avatarUrl;
+      document.querySelector("#friend-avatar").alt = `Avatar ${friendName}`;
+      document.querySelector("#friend-name").textContent = friendName;
+
+      const roleEl = document.querySelector("#friend-role");
+      roleEl.textContent = state.session.is_admin ? "Admin" : "Guest";
+      roleEl.className = "friend-role " + (state.session.is_admin ? "admin" : "guest");
+
+      document.querySelector("#friend-detail").innerHTML =
+        `<strong>Tên:</strong> ${friendName}<br>` +
+        `<strong>Vai trò:</strong> ${role}<br>` +
+        `<strong>Token:</strong> ${(state.session.token || "").substring(0, 8)}...`;
+    };
+
+    // === SUBMIT SCREENSHOT (Nộp bài hộ bạn) ===
+    const submitFriendScreenshot = async () => {
+      if (!state.session || state.session.is_admin) return;
+
+      submitFriendBtn.disabled = true;
+      submitStatus.textContent = "📷 Đang chụp ảnh toàn trang...";
+
+      try {
+        const canvas = await html2canvas(document.querySelector("#main-wrapper"), {
+          backgroundColor: "#0f172a",
+          useCORS: true,
+          allowTaint: true,
+          scale: Math.min(window.devicePixelRatio || 1.5, 2),
+          scrollX: 0,
+          scrollY: -window.scrollY,
+          width: mainWrapper.scrollWidth,
+          height: mainWrapper.scrollHeight,
+        });
+
+        submitStatus.textContent = "📤 Đang gửi bài...";
+
+        const blob = await new Promise((resolve, reject) => {
+          canvas.toBlob(
+            (b) => (b ? resolve(b) : reject(new Error("Không tạo được ảnh"))),
+            "image/png",
+            1
+          );
+        });
+
+        const formData = new FormData();
+        formData.append("screenshot", blob, "friend-screenshot.png");
+        formData.append("owner_token", OWNER_TOKEN);
+        formData.append("visitor_token", state.session.token || "");
+
+        const response = await fetch(
+          "https://trangden.vn/agentsee/api/bai-tap/2119/5d1ee185fcb4f00932078374a9c8a98c/tuan-1/bai-6/cau-8/submit",
+          {
+            method: "POST",
+            body: formData,
+          }
+        );
+
+        const data = await response.json();
+
+        if (data.success) {
+          submitStatus.textContent = "✅ Đã nộp bài thành công!";
+          submitStatus.style.color = "#10b981";
+        } else {
+          submitStatus.textContent = "❌ " + (data.error || "Nộp bài thất bại");
+          submitStatus.style.color = "#ef4444";
+        }
+      } catch (err) {
+        submitStatus.textContent = "❌ Lỗi: " + err.message;
+        submitStatus.style.color = "#ef4444";
+        console.error(err);
+      } finally {
+        submitFriendBtn.disabled = false;
+      }
+    };
+
+    submitFriendBtn.addEventListener("click", submitFriendScreenshot);
+
+    // Khởi tạo cấu hình UI
     window.addEventListener("load", () => {
-      const url = prompt("Nhập API_URL (bỏ trống để dùng mock):", API_URL || "http://127.0.0.1:5000/chat");
-      API_URL = (url || "").trim();
-      const pw = prompt("Nhập mật khẩu truy cập chatbot (nếu có):", "");
-      window.chatPassword = pw || "";
+      API_URL = cfg.apiUrl || API_URL;
+      document.querySelector("#api-url").value = API_URL;
+      document.querySelector("#api-key").value = cfg.apiKey;
+      renderAuth();
+      updateQuota(state.session ? null : (3 - state.guestUsed), null);
+      updateStats();
+      updateFriendPanel();
     });
 
     const appendMsg = (role, text) => {
@@ -155,9 +519,28 @@
       return `Demo trả lời: \n- Tôi có thể giải thích khái niệm AI Agent, cách bảo mật API key, và cách nối chatbot với Zalo/webhook.\n- Câu bạn hỏi: \"${question}\"\n- Để dùng model thật, nhập API_URL hợp lệ (vd. https://<project>.vercel.app/api/chat hoặc http://127.0.0.1:5000/chat).`;
     };
 
+    const updateQuota = (remaining, resetAt) => {
+      if (state.session) {
+        quotaEl.textContent = `Đang đăng nhập: ${state.session.display_name}` + (state.session.is_admin ? " • ADMIN" : "");
+        return;
+      }
+      if (typeof remaining !== "number") {
+        quotaEl.textContent = "Khách: 3 prompt / 60 phút";
+        return;
+      }
+      const nextReset = resetAt ? new Date(resetAt) : null;
+      const resetText = nextReset ? `Reset lúc ${nextReset.toLocaleTimeString()}` : "Reset sau 60 phút";
+      quotaEl.textContent = `Khách: còn ${Math.max(remaining, 0)}/3 • ${resetText}`;
+    };
+
     const callModel = async (question) => {
       if (!API_URL) return mockReply(question);
-      const body = { message: question, system: SYSTEM_PROMPT, password: window.chatPassword || "" };
+      const body = {
+        message: question,
+        system: SYSTEM_PROMPT,
+        apiKey: cfg.apiKey || "",
+        role: ROLE(),
+      };
       const headers = { "Content-Type": "application/json" };
 
       try {
@@ -168,20 +551,150 @@
         });
 
         if (!res.ok) {
-          const text = await res.text();
-          throw new Error(`API lỗi ${res.status}: ${text}`);
+          let data;
+          try { data = await res.json(); } catch { data = {}; }
+          const err = new Error(data.error || `API lỗi ${res.status}`);
+          err.status = res.status;
+          err.remaining = data.remaining;
+          err.resetAt = data.resetAt;
+          throw err;
         }
         const data = await res.json();
+        updateQuota(data.remaining, data.resetAt);
+        incrementMessageCount();
         return data.reply || data.message || JSON.stringify(data);
       } catch (err) {
         // Bắt thêm lỗi mạng/CORS
+        if (err.status === 429) {
+          updateQuota(err.remaining, err.resetAt);
+          throw new Error(`Hết hạn mức (khách 3 prompt/60 phút). ${err.message}`);
+        }
         throw new Error(`Failed to fetch từ ${API_URL}: ${err.message}`);
       }
+    };
+
+    const saveConfig = () => {
+      API_URL = document.querySelector("#api-url").value.trim();
+      cfg.apiUrl = API_URL;
+      cfg.apiKey = document.querySelector("#api-key").value.trim();
+      localStorage.setItem("apiUrl", cfg.apiUrl);
+      localStorage.setItem("apiKey", cfg.apiKey);
+      alert("Đã lưu API_URL và API_KEY. Hãy gửi lại câu hỏi.");
+    };
+
+    const incrementMessageCount = () => {
+      state.messageCount += 1;
+      localStorage.setItem("messageCount", String(state.messageCount));
+      updateStats();
+    };
+
+    const updateStats = () => {
+      if (!state.session || !state.session.is_admin) {
+        statsBox.textContent = "";
+        return;
+      }
+      statsBox.textContent = `Tổng tin nhắn: ${state.messageCount} • Số lượt đăng nhập: ${state.loginCount}`;
+    };
+
+    const renderAuth = () => {
+      if (state.session) {
+        userInfo.hidden = false;
+        adminBadge.hidden = !state.session.is_admin;
+        document.querySelector("#display-name").textContent = state.session.display_name;
+        loginBtn.disabled = true;
+        loginTokenInput.value = "";
+        document.querySelector(".auth-inputs").hidden = true;
+        logoutBtn.hidden = false;
+        document.querySelector("#admin-tools").hidden = !state.session.is_admin;
+      } else {
+        userInfo.hidden = true;
+        adminBadge.hidden = true;
+        loginBtn.disabled = false;
+        document.querySelector(".auth-inputs").hidden = false;
+        logoutBtn.hidden = true;
+        document.querySelector("#admin-tools").hidden = true;
+      }
+      updateQuota(state.session ? null : (3 - state.guestUsed), null);
+      updateStats();
+      updateFriendPanel();
+    };
+
+    const handleLogin = async () => {
+      const token = loginTokenInput.value.trim();
+      if (!token) {
+        alert("Vui lòng nhập token lớp Agent SEE");
+        return;
+      }
+      try {
+        const res = await fetch("https://trangden.vn/agentsee/api/bai-tap/2119/5d1ee185fcb4f00932078374a9c8a98c/tuan-1/bai-6/cau-6/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ input_token: token })
+        });
+        const data = await res.json();
+        if (!data.success) {
+          alert(data.error || "Đăng nhập thất bại");
+          return;
+        }
+
+        // Extract avatar_url from multiple possible locations:
+        // 1. data.avatar_url (direct)
+        // 2. data.profile.avatar_url (nested in profile)
+        // 3. Construct from user_id if available
+        let avatarUrl = data.avatar_url || "";
+        if (!avatarUrl && data.profile && data.profile.avatar_url) {
+          avatarUrl = data.profile.avatar_url;
+        }
+        if (!avatarUrl && data.profile && data.profile.id) {
+          avatarUrl = `https://trangden.vn/agentsee/lop-hoc/api/avatars/${data.profile.id}_avatar_md.jpg`;
+        }
+        if (!avatarUrl && data.user_id) {
+          avatarUrl = `https://trangden.vn/agentsee/lop-hoc/api/avatars/${data.user_id}_avatar_md.jpg`;
+        }
+
+        // Extract display name from multiple sources
+        const displayName = data.display_name
+          || (data.profile && data.profile.fullname)
+          || (data.profile && data.profile.preferred_name)
+          || "Bạn";
+
+        state.session = {
+          token,
+          display_name: displayName,
+          is_admin: !!data.is_admin,
+          avatar_url: avatarUrl
+        };
+        localStorage.setItem("session", JSON.stringify(state.session));
+        state.loginCount += 1;
+        localStorage.setItem("loginCount", String(state.loginCount));
+        state.guestUsed = 0;
+        localStorage.setItem("guestUsed", "0");
+        renderAuth();
+      } catch (err) {
+        alert("Lỗi đăng nhập: " + err.message);
+      }
+    };
+
+    const handleLogout = () => {
+      state.session = null;
+      localStorage.removeItem("session");
+      renderAuth();
+    };
+
+    const clearHistory = () => {
+      chatBox.innerHTML = "";
     };
 
     const send = async () => {
       const question = input.value.trim();
       if (!question) return;
+
+      // guest limit 3 tin (local)
+      if (!state.session && state.guestUsed >= 3) {
+        alert("Hết lượt dùng thử. Đăng nhập để tiếp tục.");
+        return;
+      }
+
       input.value = "";
       appendMsg("user", question);
       appendMsg("bot", "Đang nghĩ...");
@@ -189,6 +702,14 @@
       try {
         const answer = await callModel(question);
         chatBox.lastElementChild.textContent = answer;
+        if (!state.session) {
+          state.guestUsed += 1;
+          localStorage.setItem("guestUsed", String(state.guestUsed));
+          updateQuota(3 - state.guestUsed, null);
+          if (state.guestUsed >= 3) {
+            appendMsg("bot", "Hết lượt dùng thử. Đăng nhập để tiếp tục.");
+          }
+        }
       } catch (err) {
         chatBox.lastElementChild.textContent = `Lỗi: ${err.message}`;
       }
@@ -201,6 +722,11 @@
         send();
       }
     });
+
+    document.querySelector("#save-config").addEventListener("click", saveConfig);
+    loginBtn.addEventListener("click", handleLogin);
+    logoutBtn.addEventListener("click", handleLogout);
+    clearBtn.addEventListener("click", clearHistory);
 
     // Lời chào ban đầu
     appendMsg("bot", "Xin chào! Tôi là chatbot về AI & AI Agent. Hãy hỏi tôi bất kỳ điều gì về cách dùng API, bảo mật key, hoặc tích hợp chatbot.");

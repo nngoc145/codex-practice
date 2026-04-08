@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<!-- saved from url=(0051)https://trangden.vn/agentsee/lop-hoc/week/1?task=8. -->
+<html lang="vi-VN"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <!--<base href="/agentsee/lop-hoc/">--><base href=".">
+  
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="TrangDen - Nền tảng học tập trực tuyến">
+  
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="TrangDen">
+  <link rel="apple-touch-icon" href="https://trangden.vn/agentsee/lop-hoc/icons/Icon-192.png">
+  <link rel="icon" type="image/png" href="https://trangden.vn/agentsee/lop-hoc/favicon.png">
+  <title>TrangDen</title>
+  <!-- google_fonts (Flutter web) fetch fonts.gstatic.com với header khiến CORS preflight bị từ chối → app crash trước login. -->
+  <script>
+  (function () {
+    if (typeof window.fetch !== 'function') return;
+    var orig = window.fetch;
+    window.fetch = function (input, init) {
+      var url = typeof input === 'string' ? input : (input && input.url) || '';
+      if (url.indexOf('fonts.gstatic.com') === -1) {
+        return orig.apply(this, arguments);
+      }
+      if (input instanceof Request && init === undefined) {
+        var h = new Headers(input.headers);
+        h.delete('cache-control');
+        h.delete('pragma');
+        input = new Request(input.url, {
+          method: input.method, headers: h, mode: input.mode, credentials: input.credentials,
+          cache: 'default', redirect: input.redirect, referrer: input.referrer,
+          referrerPolicy: input.referrerPolicy, integrity: input.integrity,
+          keepalive: input.keepalive, signal: input.signal
+        });
+        return orig.call(this, input);
+      }
+      init = init ? Object.assign({}, init) : {};
+      init.cache = 'default';
+      if (init.headers instanceof Headers) {
+        var h2 = new Headers(init.headers);
+        h2.delete('cache-control');
+        h2.delete('pragma');
+        init.headers = h2;
+      } else if (init.headers && typeof init.headers === 'object') {
+        var o = Object.assign({}, init.headers);
+        delete o['cache-control'];
+        delete o['Cache-Control'];
+        delete o['pragma'];
+        delete o['Pragma'];
+        init.headers = o;
+      }
+      return orig.call(this, input, init);
+    };
+  })();
+  </script>
+  <!-- Be Vietnam Pro qua CSS (trình duyệt tải) — khớp với GoogleFonts + allowRuntimeFetching=false trong main.dart -->
+  <link rel="preconnect" href="https://fonts.googleapis.com/">
+  <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+  <link href="./TrangDen_files/css2" rel="stylesheet">
+  <link rel="manifest" href="https://trangden.vn/agentsee/lop-hoc/manifest.json">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; min-height: 100vh; }
+
+    /* === APP SHELL: Giao diện thật render bằng HTML === */
+    #app-shell { min-height: 100vh; filter: blur(0); }
+
+    /* AppBar */
+    .shell-appbar { background: #667eea; color: #fff; height: 56px; display: flex; align-items: center; padding: 0 16px; box-shadow: 0 2px 4px rgba(0,0,0,.15); position: sticky; top: 0; z-index: 10; }
+    .shell-appbar h1 { font-size: 20px; font-weight: 600; flex: 1; }
+
+    /* Content */
+    .shell-content { padding: 20px 16px; max-width: 800px; margin: 0 auto; }
+    .shell-welcome { background: #fff; border-radius: 16px; padding: 24px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+    .shell-welcome .avatar { width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #667eea33, #764ba233); display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
+    .shell-welcome .avatar svg { width: 28px; height: 28px; fill: #667eea; }
+    .shell-welcome h2 { font-size: 22px; color: #333; margin-bottom: 4px; }
+    .shell-welcome p { color: #888; font-size: 14px; }
+    .shell-section-title { font-size: 16px; font-weight: 600; color: #333; margin: 24px 0 12px; display: flex; align-items: center; gap: 8px; }
+    .shell-section-title svg { width: 20px; height: 20px; fill: #667eea; }
+    .shell-card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+    .shell-card { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+    .shell-card .thumb { height: 120px; background: linear-gradient(135deg, #667eea22, #764ba222); position: relative; }
+    .shell-card .thumb .skeleton { position: absolute; inset: 0; background: linear-gradient(90deg, transparent 25%, rgba(102,126,234,.08) 50%, transparent 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+    .shell-card .info { padding: 12px; }
+    .shell-card .info .skel-line { height: 14px; border-radius: 7px; background: #eee; margin-bottom: 8px; }
+    .shell-card .info .skel-line:last-child { width: 60%; margin-bottom: 0; }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    .shell-bottomnav { position: fixed; bottom: 0; left: 0; right: 0; height: 64px; background: #fff; border-top: 1px solid #eee; display: flex; align-items: center; justify-content: space-around; z-index: 10; }
+    .shell-bottomnav .nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; color: #999; font-size: 11px; }
+    .shell-bottomnav .nav-item.active { color: #667eea; }
+    .shell-bottomnav .nav-item svg { width: 24px; height: 24px; }
+
+    /* Login shell */
+    .shell-login { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #0a0a1a url('https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=1200&q=80') center/cover no-repeat; padding: 32px; position: relative; }
+    .shell-login::before { content: ''; position: absolute; inset: 0; background: rgba(0,0,0,0.55); }
+    .shell-login .card { background: #fff; border-radius: 20px; padding: 32px 24px; width: 100%; max-width: 380px; box-shadow: 0 10px 30px rgba(0,0,0,.15); position: relative; z-index: 1; }
+    .shell-login .header { text-align: center; margin-bottom: 32px; color: #fff; position: relative; z-index: 1; }
+    .shell-login .header .logo { width: 80px; height: 80px; background: #fff; border-radius: 20px; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(0,0,0,.4); }
+    .shell-login .header .logo svg { width: 44px; height: 44px; fill: #1a1a2e; }
+    .shell-login .header h1 { font-size: 28px; margin: 0 0 4px; }
+    .shell-login .header p { opacity: .8; font-size: 15px; margin: 0; }
+    .shell-login input { width: 100%; padding: 12px 16px; border: 1px solid #ddd; border-radius: 12px; font-size: 15px; margin-bottom: 12px; outline: none; }
+    .shell-login .btn-primary { width: 100%; padding: 14px; background: #1a1a2e; color: #fff; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; }
+    .shell-login .divider { display: flex; align-items: center; gap: 16px; margin: 20px 0; color: #aaa; font-size: 13px; }
+    .shell-login .divider::before, .shell-login .divider::after { content: ''; flex: 1; height: 1px; background: #ddd; }
+    .shell-login .btn-google { width: 100%; padding: 12px; background: #fff; border: 1px solid #ddd; border-radius: 12px; font-size: 15px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+
+    /* === LỚP PHỦ LOADING === */
+    #loading-overlay {
+      position: fixed; inset: 0; z-index: 9999;
+      background: rgba(0,0,0,.45);
+      backdrop-filter: blur(2px);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      color: #fff;
+      transition: opacity .4s ease;
+    }
+    #loading-overlay.fade-out { opacity: 0; pointer-events: none; }
+    #loading-overlay .loader-icon {
+      width: 64px; height: 64px; background: #fff; border-radius: 18px;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,.3);
+      margin-bottom: 20px;
+    }
+    #loading-overlay .loader-icon svg { width: 36px; height: 36px; fill: #1a1a2e; }
+    #loading-overlay .loader-text { font-size: 16px; font-weight: 500; margin-bottom: 20px; letter-spacing: .3px; }
+    #loading-overlay .progress-wrap {
+      width: 220px; height: 6px; background: rgba(255,255,255,.2); border-radius: 3px; overflow: hidden;
+    }
+    #loading-overlay .progress-bar {
+      height: 100%; width: 0%; background: #fff; border-radius: 3px;
+      transition: width .3s ease;
+    }
+    #loading-overlay .progress-pct {
+      margin-top: 8px; font-size: 13px; opacity: .7;
+    }
+  </style>
+<style id="googleidentityservice_button_styles">.qJTHM{-moz-user-select:none;-webkit-user-select:none;-ms-user-select:none;color:#202124;direction:ltr;-webkit-touch-callout:none;font-family:"Roboto-Regular",arial,sans-serif;-webkit-font-smoothing:antialiased;font-weight:400;margin:0;overflow:hidden;-webkit-text-size-adjust:100%}.ynRLnc{left:-9999px;position:absolute;top:-9999px}.L6cTce{display:none}.bltWBb{overflow-wrap:break-word;word-break:break-word}.hSRGPd{color:#1a73e8;cursor:pointer;font-weight:500;text-decoration:none}.Bz112c-W3lGp{height:16px;width:16px}.Bz112c-E3DyYd{height:20px;width:20px}.Bz112c-r9oPif{height:24px;width:24px}.Bz112c-u2z5K{height:36px;width:36px}.Bz112c-uaxL4e{border-radius:10px}.LgbsSe-Bz112c{display:block}.S9gUrf-YoZ4jf{border:none;margin:0;padding:0}.S9gUrf-YoZ4jf *{border:none;margin:0;padding:0}.fFW7wc-ibnC6b>.aZ2wEe>div{border-color:#4285f4}.P1ekSe-ZMv3u{-webkit-transition:height linear .2s;transition:height linear .2s}.P1ekSe-ZMv3u>div:nth-child(1){background-color:#1a73e8!important;-webkit-transition:width linear .3s;transition:width linear .3s}.P1ekSe-ZMv3u>div:nth-child(2){background-image:-webkit-gradient(linear,left top,right top,from(rgba(255,255,255,.7)),to(rgba(255,255,255,.7))),-webkit-gradient(linear,left top,right top,from(#1a73e8),to(#1a73e8))!important;background-image:-webkit-linear-gradient(left,rgba(255,255,255,.7),rgba(255,255,255,.7)),-webkit-linear-gradient(left,#1a73e8,#1a73e8)!important;background-image:linear-gradient(to right,rgba(255,255,255,.7),rgba(255,255,255,.7)),linear-gradient(to right,#1a73e8,#1a73e8)!important}.P1ekSe-ZMv3u>div:nth-child(3){background-image:-webkit-gradient(linear,left top,right top,from(rgba(255,255,255,.7)),to(rgba(255,255,255,.7))),-webkit-gradient(linear,left top,right top,from(#1a73e8),to(#1a73e8))!important;background-image:-webkit-linear-gradient(left,rgba(255,255,255,.7),rgba(255,255,255,.7)),-webkit-linear-gradient(left,#1a73e8,#1a73e8)!important;background-image:linear-gradient(to right,rgba(255,255,255,.7),rgba(255,255,255,.7)),linear-gradient(to right,#1a73e8,#1a73e8)!important}.haAclf{display:inline-block}.nsm7Bb-HzV7m-LgbsSe{border-radius:4px;box-sizing:border-box;-webkit-transition:background-color .218s,border-color .218s;transition:background-color .218s,border-color .218s;-moz-user-select:none;-webkit-user-select:none;-ms-user-select:none;-webkit-appearance:none;background-color:#fff;background-image:none;border:1px solid #dadce0;color:#3c4043;cursor:pointer;font-family:"Google Sans",arial,sans-serif;font-size:14px;height:40px;letter-spacing:.25px;outline:none;overflow:hidden;padding:0 12px;position:relative;text-align:center;vertical-align:middle;white-space:nowrap;width:auto}@media screen and (-ms-high-contrast:active){.nsm7Bb-HzV7m-LgbsSe{border:2px solid windowText;color:windowText}}@media screen and (preferes-contrast:more){.nsm7Bb-HzV7m-LgbsSe{color:#000}}.nsm7Bb-HzV7m-LgbsSe.pSzOP-SxQuSe{font-size:14px;height:32px;letter-spacing:.25px;padding:0 10px}.nsm7Bb-HzV7m-LgbsSe.purZT-SxQuSe{font-size:11px;height:20px;letter-spacing:.3px;padding:0 8px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe{padding:0;width:40px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe.pSzOP-SxQuSe{width:32px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe.purZT-SxQuSe{width:20px}.nsm7Bb-HzV7m-LgbsSe.JGcpL-RbRzK{border-radius:20px}.nsm7Bb-HzV7m-LgbsSe.JGcpL-RbRzK.pSzOP-SxQuSe{border-radius:16px}.nsm7Bb-HzV7m-LgbsSe.JGcpL-RbRzK.purZT-SxQuSe{border-radius:10px}.nsm7Bb-HzV7m-LgbsSe.MFS4be-Ia7Qfc{border:none;color:#fff}.nsm7Bb-HzV7m-LgbsSe.MFS4be-v3pZbf-Ia7Qfc{background-color:#1a73e8}.nsm7Bb-HzV7m-LgbsSe.MFS4be-JaPV2b-Ia7Qfc{background-color:#202124;color:#e8eaed}@media screen and (prefers-contrast:more){.nsm7Bb-HzV7m-LgbsSe.MFS4be-JaPV2b-Ia7Qfc{color:#fff}}.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-Bz112c{height:18px;margin-right:8px;min-width:18px;width:18px}.nsm7Bb-HzV7m-LgbsSe.pSzOP-SxQuSe .nsm7Bb-HzV7m-LgbsSe-Bz112c{height:14px;min-width:14px;width:14px}.nsm7Bb-HzV7m-LgbsSe.purZT-SxQuSe .nsm7Bb-HzV7m-LgbsSe-Bz112c{height:10px;min-width:10px;width:10px}.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-Bz112c{margin-left:8px;margin-right:-4px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe .nsm7Bb-HzV7m-LgbsSe-Bz112c{margin:0;padding:10px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe.pSzOP-SxQuSe .nsm7Bb-HzV7m-LgbsSe-Bz112c{padding:8px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe.purZT-SxQuSe .nsm7Bb-HzV7m-LgbsSe-Bz112c{padding:4px}.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-top-left-radius:3px;border-bottom-left-radius:3px;display:-webkit-box;display:-webkit-flex;display:flex;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center;-webkit-box-align:center;-webkit-align-items:center;align-items:center;background-color:#fff;height:36px;margin-left:-10px;margin-right:12px;min-width:36px;width:36px}.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf .nsm7Bb-HzV7m-LgbsSe-Bz112c,.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf .nsm7Bb-HzV7m-LgbsSe-Bz112c{margin:0;padding:0}.nsm7Bb-HzV7m-LgbsSe.pSzOP-SxQuSe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{height:28px;margin-left:-8px;margin-right:10px;min-width:28px;width:28px}.nsm7Bb-HzV7m-LgbsSe.purZT-SxQuSe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{height:16px;margin-left:-6px;margin-right:8px;min-width:16px;width:16px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-radius:3px;margin-left:2px;margin-right:0;padding:0}.nsm7Bb-HzV7m-LgbsSe.JGcpL-RbRzK .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-radius:18px}.nsm7Bb-HzV7m-LgbsSe.pSzOP-SxQuSe.JGcpL-RbRzK .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-radius:14px}.nsm7Bb-HzV7m-LgbsSe.purZT-SxQuSe.JGcpL-RbRzK .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-radius:8px}.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-bN97Pc-sM5MNb{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-align-items:center;-webkit-box-align:center;align-items:center;-webkit-flex-direction:row;-webkit-box-orient:horizontal;-webkit-box-direction:normal;flex-direction:row;-webkit-box-pack:justify;-webkit-justify-content:space-between;justify-content:space-between;-webkit-flex-wrap:nowrap;flex-wrap:nowrap;height:100%;position:relative;width:100%}.nsm7Bb-HzV7m-LgbsSe .oXtfBe-l4eHX{-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center}.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-BPrWId{-webkit-flex-grow:1;-webkit-box-flex:1;flex-grow:1;font-family:"Google Sans",arial,sans-serif;font-weight:500;overflow:hidden;text-overflow:ellipsis;vertical-align:top}.nsm7Bb-HzV7m-LgbsSe.purZT-SxQuSe .nsm7Bb-HzV7m-LgbsSe-BPrWId{font-weight:300}.nsm7Bb-HzV7m-LgbsSe .oXtfBe-l4eHX .nsm7Bb-HzV7m-LgbsSe-BPrWId{-webkit-flex-grow:0;-webkit-box-flex:0;flex-grow:0}.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-MJoBVe{-webkit-transition:background-color .218s;transition:background-color .218s;bottom:0;left:0;position:absolute;right:0;top:0}.nsm7Bb-HzV7m-LgbsSe:hover,.nsm7Bb-HzV7m-LgbsSe:focus{box-shadow:none;border-color:rgb(210,227,252);outline:none}.nsm7Bb-HzV7m-LgbsSe:focus-within{outline:2px solid #00639b;border-color:transparent}.nsm7Bb-HzV7m-LgbsSe:hover .nsm7Bb-HzV7m-LgbsSe-MJoBVe{background:rgba(66,133,244,.08)}.nsm7Bb-HzV7m-LgbsSe:active .nsm7Bb-HzV7m-LgbsSe-MJoBVe,.nsm7Bb-HzV7m-LgbsSe:focus .nsm7Bb-HzV7m-LgbsSe-MJoBVe{background:rgba(66,133,244,.1)}.nsm7Bb-HzV7m-LgbsSe.MFS4be-Ia7Qfc:hover .nsm7Bb-HzV7m-LgbsSe-MJoBVe{background:rgba(255,255,255,.24)}.nsm7Bb-HzV7m-LgbsSe.MFS4be-Ia7Qfc:active .nsm7Bb-HzV7m-LgbsSe-MJoBVe,.nsm7Bb-HzV7m-LgbsSe.MFS4be-Ia7Qfc:focus .nsm7Bb-HzV7m-LgbsSe-MJoBVe{background:rgba(255,255,255,.32)}.nsm7Bb-HzV7m-LgbsSe .n1UuX-DkfjY{border-radius:50%;display:-webkit-box;display:-webkit-flex;display:flex;height:20px;margin-left:-4px;margin-right:8px;min-width:20px;width:20px}.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-BPrWId{font-family:"Roboto";font-size:12px;text-align:left}.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-BPrWId .ssJRIf,.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff .fmcmS{overflow:hidden;text-overflow:ellipsis}.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-align-items:center;-webkit-box-align:center;align-items:center;color:#5f6368;fill:#5f6368;font-size:11px;font-weight:400}.nsm7Bb-HzV7m-LgbsSe.jVeSEe.MFS4be-Ia7Qfc .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff{color:#e8eaed;fill:#e8eaed}@media screen and (prefers-contrast:more){.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff,.nsm7Bb-HzV7m-LgbsSe.jVeSEe.MFS4be-Ia7Qfc .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff{color:#000;fill:#000}}.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff .Bz112c{height:18px;margin:-3px -3px -3px 2px;min-width:18px;width:18px}.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-top-left-radius:0;border-bottom-left-radius:0;border-top-right-radius:3px;border-bottom-right-radius:3px;margin-left:12px;margin-right:-10px}.nsm7Bb-HzV7m-LgbsSe.jVeSEe.JGcpL-RbRzK .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-radius:18px}.L5Fo6c-sM5MNb{border:0;display:block;left:0;position:relative;top:0}.L5Fo6c-bF1uUb{border-radius:4px;bottom:0;cursor:pointer;left:0;position:absolute;right:0;top:0}.L5Fo6c-bF1uUb:focus{border:none;outline:none}sentinel{}</style><script type="application/javascript" src="./TrangDen_files/main.dart.js"></script><meta name="generator" content="Flutter"><meta flt-viewport="" name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><meta id="flutterweb-theme" name="theme-color" content="rgba(0,0,0,0)"></head>
+<body flt-embedding="full-page" flt-renderer="canvaskit" flt-build-mode="release" spellcheck="false" style="position: fixed; inset: 0px; overflow: hidden; padding: 0px; margin: 0px; user-select: none; touch-action: none;"><flt-semantics-placeholder role="button" aria-live="polite" tabindex="0" aria-label="Enable accessibility" style="position: absolute; left: -1px; top: -1px; width: 1px; height: 1px;"></flt-semantics-placeholder>
+  <!-- APP SHELL: Giao diện quen thuộc phía sau -->
+  
+
+  <!-- LỚP PHỦ LOADING -->
+  
+
+
+  <script>
+    function clearAppCache() {
+      // Xoá localStorage
+      localStorage.clear();
+      // Xoá sessionStorage
+      sessionStorage.clear();
+      // Xoá service worker cache
+      if ('caches' in window) {
+        caches.keys().then(function(names) {
+          for (var n of names) caches.delete(n);
+        });
+      }
+      // Unregister service workers
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function(regs) {
+          for (var r of regs) r.unregister();
+        });
+      }
+      // Reload bỏ cache
+      setTimeout(function() { location.reload(true); }, 300);
+    }
+  </script>
+  <!-- jsQR for QR code scanning -->
+  <script src="./TrangDen_files/jsQR.min.js"></script>
+  <!-- Google Identity Services -->
+  <script src="./TrangDen_files/client" async="" defer=""></script>
+  <!-- Force unregister old Service Workers ngay khi load -->
+  <script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(function(regs) {
+      regs.forEach(function(r) { r.unregister(); });
+    });
+    if ('caches' in window) {
+      caches.keys().then(function(names) {
+        names.forEach(function(n) { caches.delete(n); });
+      });
+    }
+  }
+  </script>
+  <!-- Flutter load ngầm -->
+  <script src="./TrangDen_files/flutter_bootstrap.js" async=""></script>
+  <script>
+    // Giả lập tiến trình dựa trên thời gian thực tế (~10s)
+    (function() {
+      var bar = document.getElementById('progress-bar');
+      var pct = document.getElementById('progress-pct');
+      var progress = 0;
+      var done = false;
+
+      // Tăng nhanh đầu, chậm dần cuối (easing)
+      var timer = setInterval(function() {
+        if (done) return;
+        var remaining = 95 - progress;
+        var step = Math.max(0.3, remaining * 0.06);
+        progress = Math.min(95, progress + step);
+        bar.style.width = progress + '%';
+        pct.textContent = Math.round(progress) + '%';
+      }, 200);
+
+      function dismissOverlay() {
+        done = true;
+        clearInterval(timer);
+        if (bar) bar.style.width = '100%';
+        if (pct) pct.textContent = '100%';
+        setTimeout(function() {
+          var overlay = document.getElementById('loading-overlay');
+          var shell = document.getElementById('app-shell');
+          if (overlay) { overlay.classList.add('fade-out'); setTimeout(function() { overlay.remove(); }, 400); }
+          if (shell) { shell.remove(); }
+        }, 300);
+      }
+
+      window.addEventListener('flutter-first-frame', dismissOverlay);
+
+      // Tránh xoay vô hạn nếu Flutter lỗi (font, JS, v.v.)
+      setTimeout(function() {
+        if (done) return;
+        clearInterval(timer);
+        var overlay = document.getElementById('loading-overlay');
+        if (!overlay || overlay.classList.contains('fade-out')) return;
+        overlay.innerHTML = '<div style="max-width:360px;text-align:center;padding:24px;color:#fff;font-family:system-ui,sans-serif">' +
+          '<p style="font-size:16px;margin:0 0 12px">Không tải được ứng dụng (quá lâu hoặc lỗi script).</p>' +
+          '<p style="font-size:13px;opacity:.85;margin:0 0 16px">Thử xóa cache / Ctrl+Shift+R hoặc bấm nút dưới.</p>' +
+          '<button type="button" onclick="clearAppCache()" style="padding:12px 20px;border-radius:10px;border:0;background:#fff;color:#1a1a2e;font-weight:600;cursor:pointer">Xóa cache & tải lại</button></div>';
+      }, 35000);
+    })();
+  </script>
+<script defer="" src="./TrangDen_files/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon="{&quot;version&quot;:&quot;2024.11.0&quot;,&quot;token&quot;:&quot;764a3940343548b3bd856617001ebbde&quot;,&quot;r&quot;:1,&quot;server_timing&quot;:{&quot;name&quot;:{&quot;cfCacheStatus&quot;:true,&quot;cfEdge&quot;:true,&quot;cfExtPri&quot;:true,&quot;cfL4&quot;:true,&quot;cfOrigin&quot;:true,&quot;cfSpeedBrain&quot;:true},&quot;location_startswith&quot;:null}}" crossorigin="anonymous"></script>
+
+
+<div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"><template shadowrootmode="open"><div class="glasp-extension" style="font-family: inherit;"></div></template></div><p aria-hidden="true" style="position: fixed; bottom: 100%; visibility: hidden; opacity: 0; pointer-events: none; width: auto; height: auto; white-space: nowrap; line-height: 9999px; letter-spacing: 9999px; word-spacing: 9999px; margin: 0px 0px 9999px;">flutter typography measurement</p><flt-announcement-host><flt-announcement-polite aria-live="polite" style="position: fixed; overflow: hidden; transform: translate(-99999px, -99999px); width: 1px; height: 1px;"></flt-announcement-polite><flt-announcement-assertive aria-live="assertive" style="position: fixed; overflow: hidden; transform: translate(-99999px, -99999px); width: 1px; height: 1px;"></flt-announcement-assertive></flt-announcement-host><flutter-view style="position: absolute; inset: 0px; width: 1365px; height: 958px;" flt-view-id="0" tabindex="-1"><flt-glass-pane><template shadowrootmode="open"><flt-scene-host style="pointer-events: none;"><flt-scene><flt-canvas-container><canvas aria-hidden="true" width="1365" height="958" style="position: absolute; width: 1365px; height: 958px;"></canvas></flt-canvas-container></flt-scene></flt-scene-host><style id="flt-internals-stylesheet"> flt-scene-host {  font: normal normal 14px sans-serif;} flt-semantics input[type=range] {  appearance: none;  -webkit-appearance: none;  width: 100%;  position: absolute;  border: none;  top: 0;  right: 0;  bottom: 0;  left: 0;} input::selection {  background-color: transparent;} textarea::selection {  background-color: transparent;} flt-semantics input, flt-semantics textarea, flt-semantics [contentEditable="true"] {  caret-color: transparent;} .flt-text-editing::placeholder {  opacity: 0;}:focus { outline: rgb(0, 0, 0) none 0px;} .transparentTextEditing:-webkit-autofill, .transparentTextEditing:-webkit-autofill:hover, .transparentTextEditing:-webkit-autofill:focus, .transparentTextEditing:-webkit-autofill:active {  opacity: 0 !important;}</style></template></flt-glass-pane><flt-text-editing-host></flt-text-editing-host><flt-semantics-host style="position: absolute; transform-origin: 0px 0px 0px; transform: scale(1);"></flt-semantics-host><style id="flt-text-editing-stylesheet">flutter-view flt-scene-host {  font: normal normal 14px sans-serif;}flutter-view flt-semantics input[type=range] {  appearance: none;  -webkit-appearance: none;  width: 100%;  position: absolute;  border: none;  top: 0;  right: 0;  bottom: 0;  left: 0;}flutter-view input::selection {  background-color: transparent;}flutter-view textarea::selection {  background-color: transparent;}flutter-view flt-semantics input,flutter-view flt-semantics textarea,flutter-view flt-semantics [contentEditable="true"] {  caret-color: transparent;}flutter-view .flt-text-editing::placeholder {  opacity: 0;}flutter-view:focus { outline: rgb(0, 0, 0) none 0px;}flutter-view .transparentTextEditing:-webkit-autofill,flutter-view .transparentTextEditing:-webkit-autofill:hover,flutter-view .transparentTextEditing:-webkit-autofill:focus,flutter-view .transparentTextEditing:-webkit-autofill:active {  opacity: 0 !important;}</style></flutter-view></body><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div></html>

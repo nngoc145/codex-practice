@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>drngoc</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --panel: #ffffff;
+      --grid: #eef2f7;
+      --line: #cbd5e1;
+      --x: #2563eb;
+      --o: #d946ef;
+      --text: #0f172a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Inter", system-ui, sans-serif;
+      background: radial-gradient(circle at 15% 20%, #ffffff, #f1f5f9 55%, #e5e7eb 90%);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 16px;
+    }
+    .card {
+      width: min(900px, 100%);
+      background: var(--panel);
+      border: 1px solid #e2e8f0;
+      border-radius: 20px;
+      box-shadow: 0 16px 48px rgba(15, 23, 42, 0.12);
+      overflow: hidden;
+    }
+    header { padding: 20px 24px 10px; }
+    h1 { margin: 0; font-size: clamp(1.8rem, 3vw, 2.4rem); }
+    p { margin: 8px 0 0; color: #475569; line-height: 1.6; }
+    .bar {
+      display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+      padding: 12px 24px 16px;
+    }
+    .pill {
+      padding: 10px 14px; border-radius: 12px; background: #f8fafc;
+      border: 1px solid #e2e8f0; font-weight: 600;
+      color: #0f172a;
+    }
+    .actions { margin-left: auto; display: flex; gap: 10px; }
+    button {
+      background: linear-gradient(135deg, #2563eb, #60a5fa);
+      color: white; border: none; border-radius: 12px;
+      padding: 10px 14px; font-weight: 700; cursor: pointer;
+      transition: transform 120ms ease, filter 120ms ease;
+    }
+    button:hover { filter: brightness(1.07); }
+    button:active { transform: translateY(1px); }
+    .board-wrap { padding: 0 24px 24px; display: grid; place-items: center; }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(15, 1fr);
+      width: min(760px, 100%);
+      aspect-ratio: 1;
+      background: var(--grid);
+      border: 3px solid #e2e8f0;
+      border-radius: 16px;
+      box-shadow: inset 0 0 0 1px #d8e0ea;
+    }
+    .cell {
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      background: transparent;
+      position: relative;
+      cursor: pointer;
+      color: inherit;
+      display: grid; place-items: center;
+      font-size: clamp(1.2rem, 3vw, 2rem);
+      font-weight: 800;
+      transition: background-color 120ms ease;
+    }
+    .cell:hover { background: rgba(37,99,235,0.08); }
+    .cell.disabled { cursor: default; }
+    .mark.x { color: var(--x); }
+    .mark.o { color: var(--o); }
+    .win { background: rgba(94, 234, 212, 0.25) !important; box-shadow: inset 0 0 0 2px rgba(94,234,212,0.5); }
+    .footer { padding: 0 24px 24px; color: #475569; }
+    @media (max-width: 640px) {
+      .actions { width: 100%; }
+      .bar { flex-direction: column; align-items: flex-start; }
+      .actions { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <header>
+      <h1>drngoc</h1>
+      <p>Chạm ô để đánh. Người thắng là người xếp được 5 quân liên tiếp ngang, dọc hoặc chéo.</p>
+    </header>
+    <div class="bar">
+      <div class="pill" id="turn">Lượt: X</div>
+      <div class="pill" id="score">Điểm: X 0 • O 0</div>
+      <div class="actions">
+        <button id="restart">Chơi lại ván</button>
+        <button id="reset">Xoá điểm</button>
+      </div>
+    </div>
+    <div class="board-wrap">
+      <div class="board" id="board"></div>
+    </div>
+    <div class="footer">Trò chơi offline, hai người chơi trên cùng thiết bị.</div>
+  </div>
+  <script>
+    const SIZE = 15;
+    const WIN = 5;
+    const boardEl = document.getElementById('board');
+    const turnEl = document.getElementById('turn');
+    const scoreEl = document.getElementById('score');
+    const restartBtn = document.getElementById('restart');
+    const resetBtn = document.getElementById('reset');
+
+    let grid = [];
+    let player = 'X';
+    let playing = true;
+    let score = { X: 0, O: 0 };
+
+    function init() {
+      boardEl.innerHTML = '';
+      grid = Array.from({ length: SIZE }, () => Array(SIZE).fill(''));
+      for (let r = 0; r < SIZE; r++) {
+        for (let c = 0; c < SIZE; c++) {
+          const btn = document.createElement('button');
+          btn.className = 'cell';
+          btn.dataset.r = r;
+          btn.dataset.c = c;
+          btn.addEventListener('click', onCell);
+          boardEl.appendChild(btn);
+        }
+      }
+      player = 'X';
+      playing = true;
+      updateTurn();
+    }
+
+    function updateTurn(text) {
+      turnEl.textContent = text || `Lượt: ${player}`;
+      scoreEl.textContent = `Điểm: X ${score.X} • O ${score.O}`;
+    }
+
+    function onCell(e) {
+      if (!playing) return;
+      const r = Number(e.currentTarget.dataset.r);
+      const c = Number(e.currentTarget.dataset.c);
+      if (grid[r][c]) return;
+      grid[r][c] = player;
+      renderMark(e.currentTarget, player);
+
+      const winCells = checkWin(r, c, player);
+      if (winCells) {
+        markWin(winCells);
+        score[player] += 1;
+        playing = false;
+        updateTurn(`Thắng: ${player}`);
+        return;
+      }
+      if (isDraw()) {
+        playing = false;
+        updateTurn('Hoà bàn này');
+        return;
+      }
+      player = player === 'X' ? 'O' : 'X';
+      updateTurn();
+    }
+
+    function renderMark(cell, p) {
+      const span = document.createElement('span');
+      span.className = `mark ${p.toLowerCase()}`;
+      span.textContent = p;
+      cell.appendChild(span);
+      cell.classList.add('disabled');
+    }
+
+    function inBounds(r, c) {
+      return r >= 0 && r < SIZE && c >= 0 && c < SIZE;
+    }
+
+    function checkWin(r, c, p) {
+      const dirs = [ [0,1], [1,0], [1,1], [1,-1] ];
+      for (const [dr, dc] of dirs) {
+        const line = [{ r, c }];
+        let nr = r + dr, nc = c + dc;
+        while (inBounds(nr, nc) && grid[nr][nc] === p) { line.push({ r: nr, c: nc }); nr += dr; nc += dc; }
+        nr = r - dr; nc = c - dc;
+        while (inBounds(nr, nc) && grid[nr][nc] === p) { line.unshift({ r: nr, c: nc }); nr -= dr; nc -= dc; }
+        if (line.length >= WIN) return line.slice(0, WIN);
+      }
+      return null;
+    }
+
+    function isDraw() { return grid.every(row => row.every(v => v)); }
+
+    function markWin(cells) {
+      cells.forEach(({ r, c }) => {
+        const idx = r * SIZE + c;
+        boardEl.children[idx].classList.add('win');
+      });
+    }
+
+    restartBtn.addEventListener('click', () => {
+      init();
+    });
+
+    resetBtn.addEventListener('click', () => {
+      score = { X: 0, O: 0 };
+      init();
+      updateTurn();
+    });
+
+    init();
+  </script>
+</body>
+</html>
