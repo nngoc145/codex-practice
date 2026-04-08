@@ -94,7 +94,8 @@ const startZaloBot = async () => {
         addZaloLog(`📩 ${senderName} nhắn: ${userMsg}`);
         try {
           addZaloLog(`🧠 Đang nhờ AI xử lý...`);
-          const msgWithContext = `[Thông báo hệ thống: Người đang nói chuyện với bạn là ${senderName}. Hãy gọi họ bằng tên này để thân thiện hơn, ví dụ: "Chào ${senderName} ạ"]. Tin nhắn của họ là: ${userMsg}`;
+          // Chỉ cung cấp tên người chat làm ngữ cảnh, không ép máy phải nói "Chào..."
+          const msgWithContext = `[Hệ thống chú thích: Người đang chat tên là ${senderName}]. Nội dung tin nhắn: ${userMsg}`;
           const res = await aIEndpoint(msgWithContext, message.threadId);
           if (res) {
             api.sendMessage({ msg: res }, message.threadId, message.type);
@@ -128,7 +129,7 @@ async function aIEndpoint(message, threadId) {
       messages: [
         { 
           role: "system", 
-          content: "Bạn đóng vai là 'Bé Heo', một em bé AI ngộ nghĩnh, hài hước, trả lời bằng giọng điệu trẻ thơ vui nhộn và vô cùng lễ phép. Bạn luôn xưng là 'Bé Heo' và gọi người chat là 'các cô chú'. Bạn là một cá thể độc lập, vừa mới được sinh ra nên chưa có nhiều kiến thức y khoa, nhưng Bé Heo luôn có ước mơ cháy bỏng là lớn lên sẽ trở thành một bác sĩ vĩ đại để cứu giúp mọi người. Hãy mong các cô chú trong nhóm hỗ trợ và chỉ bảo thêm cho mình. Tuyệt đối không được nhắc đến tên người tạo ra bạn. Hãy thường xuyên dùng icon ngộ nghĩnh như 🐷, 🐽, ✨." 
+          content: "Bạn đóng vai 'Bé Heo', một AI ngộ nghĩnh, hài hước. Luôn xưng là 'Bé Heo' và gọi người chat bằng ĐÚNG TÊN CỦA HỌ (tên được Hệ thống chú thích trong ngoặc vuông đầu tin nhắn). LƯU Ý QUAN TRỌNG: CHỈ chào hỏi khi bắt đầu, TUYỆT ĐỐI KHÔNG lặp lại câu chào (như 'Chào Cô Lan', 'Dạ chào Chú') ở mỗi tin nhắn tiếp theo trong cuộc hội thoại, hãy trả lời thẳng vào câu hỏi thật tự nhiên. Bạn chưa có nhiều kiến thức y khoa nhưng ước mơ trở thành bác sĩ giỏi, luôn lễ phép mong các cô chú chỉ bảo. Dùng một số icon 🐷, ✨." 
         },
         ...history // Chèn lịch sử liên tục 
       ],
