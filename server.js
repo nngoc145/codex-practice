@@ -16,6 +16,7 @@ let zaloInstance = null;
 let zaloLogs = [];
 
 const chatHistories = new Map();
+const activeSessions = new Map(); // [threadId_senderId] -> timestamp
 const MAX_HISTORY_LENGTH = 10;
 
 const addZaloLog = (msg) => {
@@ -61,24 +62,44 @@ const startZaloBot = async () => {
     addZaloLog("Đăng nhập Zalo thành công. Đang lắng nghe...");
 
     api.listener.on("message", async (message) => {
-      const isPlainText = typeof message.data.content === "string";
-      if (message.isSelf || !isPlainText) return;
+      // Cho phép cả tin nhắn hình ảnh
+      if (message.isSelf) return;
       
       if (message.type === ThreadType.Group) {
-        const userMsg = message.data.content || "";
-        // Log nội dung thô để kiểm tra tại sao Bot không nhận ra
-        addZaloLog(`[Gỡ lỗi hệ thống] Zalo báo có tin nhắn vào: ${JSON.stringify(userMsg)}`);
-        
-        // Kiểm tra đa từ khóa: Baby Health, Bé heo, Be heo, Heo, Bé, Be.
-        const lowerMsg = String(userMsg).toLowerCase();
-        
-        // Dùng Regex \b để đảm bảo nó là 1 từ độc lập, không phải bị dính trong chữ khác (VD: "bên" không bị ép thành "be")
-        const keywordPattern = /\b(baby health|bé heo|be heo|heo|bé|be)\b/u;
-        
-        if (!keywordPattern.test(lowerMsg)) {
-          addZaloLog(`[Gỡ lỗi] Đã bỏ qua tin nhắn trên vì bộ lọc không tìm thấy từ khóa chỉ định.`);
-          return; // Bỏ qua nếu không gọi tên
+        let userMsgStr = "";
+        let photoUrl = "";
+
+        if (typeof message.data.content === "string") {
+            userMsgStr = message.data.content;
+        } else if (message.data.content && typeof message.data.content === "object" && message.data.content.href) {
+            photoUrl = message.data.content.href;
+            // Nếu có text đi kèm khi gửi ảnh thì nó nằm trong description hoặc msg
+            if (message.data.content.description) userMsgStr = message.data.content.description;
         }
+
+        // Kiểm tra Session và Gọi Tên
+        const lowerMsg = String(userMsgStr).toLowerCase();
+        const keywordPattern = /\b(baby health|bé heo|be heo|heo|bé|be)\b/u;
+        const sessionKey = `${message.threadId}_${message.senderId}`;
+        const now = Date.now();
+        let isTargeted = false;
+
+        if (keywordPattern.test(lowerMsg)) {
+            isTargeted = true; // Gọi tên trực tiếp bằng từ khóa
+        } else {
+             // Không gọi tên nhưng có Session còn hạn (5 phút)
+            const lastActive = activeSessions.get(sessionKey);
+            if (lastActive && (now - lastActive < 5 * 60 * 1000)) {
+                isTargeted = true;
+            }
+        }
+
+        if (!isTargeted) {
+          return; // Bỏ qua nếu không gọi tên và không đang chat dở
+        }
+
+        // Cập nhật lại thời gian Session để duy trì mạch chat
+        activeSessions.set(sessionKey, now);
 
         let senderName = "cô chú";
         try {
@@ -91,12 +112,12 @@ const startZaloBot = async () => {
            }
         } catch(e) { }
 
-        addZaloLog(`📩 ${senderName} nhắn: ${userMsg}`);
+        addZaloLog(`📩 ${senderName} nhắn: ${userMsgStr || '[Ảnh đính kèm]'}`);
         try {
           addZaloLog(`🧠 Đang nhờ AI xử lý...`);
           // Chỉ cung cấp tên người chat làm ngữ cảnh, không ép máy phải nói "Chào..."
-          const msgWithContext = `[Hệ thống chú thích: Người đang chat tên là ${senderName}]. Nội dung tin nhắn: ${userMsg}`;
-          const res = await aIEndpoint(msgWithContext, message.threadId);
+          const msgWithContext = `[Hệ thống chú thích: Người đang chat tên là ${senderName}]. Nội dung: ${userMsgStr}`;
+          const res = await aIEndpoint(msgWithContext, photoUrl, message.threadId);
           if (res) {
             api.sendMessage({ msg: res }, message.threadId, message.type);
             addZaloLog(`🤖 Đã trả lời trong Group: ${res}`);
@@ -115,21 +136,25 @@ const startZaloBot = async () => {
   }
 };
 
-async function aIEndpoint(message, threadId) {
+async function aIEndpoint(messageText, photoUrl, threadId) {
   try {
     // Lấy lịch sử cũ của phòng chat này
     const history = chatHistories.get(threadId) || [];
     
-    // Đẩy tin nhắn mới của bệnh nhân vào bộ nhớ
-    history.push({ role: "user", content: message });
+    // Đẩy content dạng Multi-modal nếu có ảnh
+    let contentArr = [];
+    if (messageText) contentArr.push({ type: "text", text: messageText });
+    if (photoUrl) contentArr.push({ type: "image_url", image_url: { url: photoUrl } });
+    
+    history.push({ role: "user", content: contentArr.length > 0 ? contentArr : messageText });
 
     // Cấu trúc nội dung trò chuyện (Prompt)
     const payload = {
-      model: "meta/llama-3.1-70b-instruct", // Nâng model lên 70 tỉ tham số
+      model: "meta/llama-3.2-90b-vision-instruct", // Nâng model lên 90 tỉ Vision
       messages: [
         { 
           role: "system", 
-          content: "Bạn đóng vai 'Bé Heo', một AI ngộ nghĩnh, hài hước. Luôn xưng là 'Bé Heo' và gọi người chat bằng ĐÚNG TÊN CỦA HỌ (tên được Hệ thống chú thích trong ngoặc vuông đầu tin nhắn). LƯU Ý QUAN TRỌNG: CHỈ chào hỏi khi bắt đầu, TUYỆT ĐỐI KHÔNG lặp lại câu chào (như 'Chào Cô Lan', 'Dạ chào Chú') ở mỗi tin nhắn tiếp theo trong cuộc hội thoại, hãy trả lời thẳng vào câu hỏi thật tự nhiên. Bạn chưa có nhiều kiến thức y khoa nhưng ước mơ trở thành bác sĩ giỏi, luôn lễ phép mong các cô chú chỉ bảo. Dùng một số icon 🐷, ✨." 
+          content: "Bạn đóng vai 'Bé Heo', AI ngộ nghĩnh, hài hước. Gọi người chat bằng ĐÚNG TÊN CỦA HỌ (trong ngoặc vuông đầu tin). LƯU Ý: CHỈ chào khi bắt đầu hội thoại, TUYỆT ĐỐI KHÔNG chào liên tục ở các câu tiếp theo. Nếu khách hàng gửi ẢNH XÉT NGHIỆM/ĐƠN THUỐC: Bạn TÓM TẮT sơ bộ các dòng có chữ khác thường, và BẮT BUỘC phải KHUYÊN người bệnh trực tiếp chụp gửi hoặc mang đến phòng khám của Bác Sĩ Ngọc để xin chẩn đoán chính xác nhất, tuyệt đối AI KHÔNG tự ý chẩn đoán y khoa. Dùng icon 🐷, ✨." 
         },
         ...history // Chèn lịch sử liên tục 
       ],
