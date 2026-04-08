@@ -69,7 +69,7 @@ const startZaloBot = async () => {
         
         // Kiểm tra xem tin nhắn có nhắc đến Bé Heo không (chữ hoa/thường đều được, có dấu/không dấu)
         const lowerMsg = userMsg.toLowerCase();
-        if (!lowerMsg.includes('bé heo') && !lowerMsg.includes('be heo')) {
+        if (!lowerMsg.includes('bé heo') && !lowerMsg.includes('be heo') && !lowerMsg.includes('baby health')) {
           return; // Bỏ qua nếu không gọi tên
         }
 
